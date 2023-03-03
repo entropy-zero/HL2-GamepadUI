@@ -434,18 +434,70 @@ public:
 
     void IncrementValue()
     {
+        if (m_DangerousOptions.Count())
+        {
+            int nNewItem = 0;
+            if ( m_Options.Count() )
+                nNewItem = ( m_nSelectedItem + 1) % m_Options.Count();
+        
+            int nIndex = m_DangerousOptions.Find( nNewItem );
+            if (nIndex != m_DangerousOptions.InvalidIndex())
+            {
+                ShowWarning( nIndex, true );
+                return;
+            }
+        }
+
+        IncrementValueInner();
+    }
+
+    void DecrementValue()
+    {
+        if (m_DangerousOptions.Count())
+        {
+            int nNewItem = m_nSelectedItem - 1;
+            if ( nNewItem < 0 )
+                nNewItem = Max( 0, m_Options.Count() - 1);
+        
+            int nIndex = m_DangerousOptions.Find( nNewItem );
+            if (nIndex != m_DangerousOptions.InvalidIndex())
+            {
+                ShowWarning( nIndex, false );
+                return;
+            }
+        }
+
+        DecrementValueInner();
+    }
+
+    void IncrementValueInner()
+    {
         if ( m_Options.Count() )
             m_nSelectedItem = ( m_nSelectedItem + 1 ) % m_Options.Count();
         if ( m_bInstantApply )
             UpdateConVar();
     }
 
-    void DecrementValue()
+    void DecrementValueInner()
     {
         if ( --m_nSelectedItem < 0 )
             m_nSelectedItem = Max( 0, m_Options.Count() - 1 );
         if ( m_bInstantApply )
             UpdateConVar();
+    }
+
+    void ShowWarning( int nIndex, bool bIncrement )
+    {
+        new GamepadUIGenericConfirmationPanel( GamepadUIOptionsPanel::GetInstance(), "OptionWarning", GamepadUIString( "#GameUI_Confirm" ).String(), m_DangerousOptionsText[nIndex].String(),
+            [this, bIncrement]() {
+                bIncrement ? this->IncrementValueInner() : this->DecrementValueInner();
+            }, true, true );
+    }
+
+    void AddDangerousOption( int option, const char *pszText )
+    {
+        m_DangerousOptions.AddToTail( option );
+        m_DangerousOptionsText.AddToTail( GamepadUIString( pszText ) );
     }
 
     void UpdateConVar() OVERRIDE
@@ -552,6 +604,9 @@ private:
     CUtlVector< GamepadUIOption > m_Options;
 
     GAMEPADUI_PANEL_PROPERTY( float, m_flClickPadding, "Button.Wheel.ClickPadding", "24", SchemeValueTypes::ProportionalFloat );
+
+    CUtlVector< int > m_DangerousOptions;
+    CUtlVector< GamepadUIString > m_DangerousOptionsText;
 
 };
 
@@ -2022,6 +2077,16 @@ void GamepadUIOptionsPanel::LoadOptionTabs( const char *pszOptionsFile )
                             }
                         }
                         button->SetToDefault();
+
+                        // Values which require confirmation before changing
+                        KeyValues *pConfirm = pItemData->FindKey( "confirm" );
+                        if (pConfirm)
+                        {
+                            for ( KeyValues* pConfirmData = pConfirm->GetFirstSubKey(); pConfirmData != NULL; pConfirmData = pConfirmData->GetNextKey() )
+                            {
+                                button->AddDangerousOption( V_atoi( pConfirmData->GetName() ), pConfirmData->GetString() );
+                            }
+                        }
 
                         m_Tabs[ m_nTabCount ].pButtons.AddToTail( button );
                     }
