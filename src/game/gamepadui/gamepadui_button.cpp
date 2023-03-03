@@ -11,6 +11,7 @@
 #define DEFAULT_BTN_ARMED_SOUND "ui/buttonrollover.wav"
 #define DEFAULT_BTN_RELEASED_SOUND "ui/buttonclickrelease.wav"
 
+ConVar gamepadui_center_footer_buttons( "gamepadui_center_footer_buttons", "1", FCVAR_NONE, "Centers footer buttons when not using gamepad" );
 
 GamepadUIButton::GamepadUIButton( vgui::Panel *pParent, vgui::Panel* pActionSignalTarget, const char *pSchemeFile, const char *pCommand, const char *pText, const char *pDescription )
     : BaseClass( pParent, "", "", pActionSignalTarget, pCommand )
@@ -189,7 +190,12 @@ int GamepadUIButton::PaintText()
             m_glyph.PaintGlyph( nGlyphPosX, nGlyphPosY, nGlyphSize, nAlpha );
         }
     }
+    else
 #endif // HL2_RETAIL
+	if (GetFooterButton() != FooterButtons::None && gamepadui_center_footer_buttons.GetBool() && !m_CenterX)
+    {
+        nTextPosX = m_flWidth / 2 - nTextSizeX / 2;
+    }
 
     if (!m_strButtonText.IsEmpty())
     {

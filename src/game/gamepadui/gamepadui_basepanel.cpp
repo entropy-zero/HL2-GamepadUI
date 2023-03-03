@@ -52,6 +52,16 @@ GamepadUIMainMenu* GamepadUIBasePanel::GetMainMenuPanel() const
     return m_pMainMenu;
 }
 
+GamepadUIFrame *GamepadUIBasePanel::GetCurrentFrame() const
+{
+    return m_pCurrentFrame;
+}
+
+void GamepadUIBasePanel::SetCurrentFrame( GamepadUIFrame *pFrame )
+{
+    m_pCurrentFrame = pFrame;
+}
+
 
 void GamepadUIBasePanel::OnMenuStateChanged()
 {
@@ -62,6 +72,12 @@ void GamepadUIBasePanel::OnMenuStateChanged()
     }
     else
         ReleaseBackgroundMusic();
+
+    if (m_pCurrentFrame && m_pCurrentFrame != m_pMainMenu)
+    {
+        m_pCurrentFrame->Close();
+        m_pCurrentFrame = NULL;
+    }
 }
 
 void GamepadUIBasePanel::ActivateBackgroundEffects()

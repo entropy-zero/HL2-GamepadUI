@@ -127,6 +127,14 @@ private:
 	
     float   m_flScreenRatio = 1.0f;
 
+#ifdef MAPBASE
+    char	m_szChallengeFileName[MAX_PATH];
+    char	m_szChallengeMapName[48];
+    char	m_szChallengeName[48];
+
+    int		m_iBronze, m_iSilver, m_iGold;
+#endif
+
     static GamepadUI *s_pGamepadUI;
 };
 
