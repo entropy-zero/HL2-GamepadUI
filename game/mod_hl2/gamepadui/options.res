@@ -40,6 +40,41 @@
 		"title"			"#GameUI_Keyboard"
 		"items_from"	"keyboard"
 		"alternating"   "1"
+		"items"
+		{
+			"AdvancedHeader"
+			{
+				"text"			"#GameUI_AdvancedNoEllipsis"
+				"type"			"headeryheader"
+				"advanced"		"1"
+			}
+			
+			"FastWeaponSwitch"
+			{
+				"text"			"#GameUI_FastSwitchCheck"
+				"type"			"wheelywheel"
+				"convar"		"hud_fastswitch"
+
+				"options"
+				{
+					"0"		"#gameui_disabled"
+					"1"		"#gameui_enabled"
+				}
+			}
+			
+			"DeveloperConsole"
+			{
+				"text"			"#GameUI_DeveloperConsoleCheck"
+				"type"			"wheelywheel"
+				"convar"		"con_enable"
+
+				"options"
+				{
+					"0"		"#gameui_disabled"
+					"1"		"#gameui_enabled"
+				}
+			}
+		}
 	}
 	"Mouse"
 	{
@@ -83,6 +118,7 @@
 				"min"			"0.1"
 				"max"			"6.0"
 				"step"			"0.1"
+				"mouse_step"	"0.01"
 
 				"textprecision" "2"
 			}
@@ -122,6 +158,7 @@
 				"min"			"1.0"
 				"max"			"1.4"
 				"step"			"0.05"
+				"mouse_step"	"0.01"
 
 				"depends_on"	"m_customaccel"
 
@@ -144,6 +181,7 @@
 				"min"			"0.0"
 				"max"			"1.0"
 				"step"			"0.1"
+				"mouse_step"	"0.01"
 			}
 
 			"MusicSlider"
@@ -155,6 +193,7 @@
 				"min"			"0.0"
 				"max"			"1.0"
 				"step"			"0.1"
+				"mouse_step"	"0.01"
 			}
 
 			"SpeakerConfiguration"
@@ -425,6 +464,7 @@
 				"min"			"75"
 				"max"			"120"
 				"step"			"5"
+				"mouse_step"	"1"
 
 				"textprecision" "0"
 			}
