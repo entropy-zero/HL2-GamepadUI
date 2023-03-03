@@ -373,7 +373,7 @@ void GamepadUINewGamePanel::ApplySchemeSettings( vgui::IScheme* pScheme )
         float flScreenRatio = GamepadUI::GetInstance().GetScreenRatio();
         m_ChapterOffsetX *= (flScreenRatio*flScreenRatio);
     }
-    
+
     m_pScrollBar->InitScrollBar( &m_ScrollState, m_ChapterOffsetX, m_ChapterOffsetY + m_pChapterButtons[0]->GetTall() + m_ChapterSpacing );
 }
 
