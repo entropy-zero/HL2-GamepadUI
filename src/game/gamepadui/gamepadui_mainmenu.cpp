@@ -40,7 +40,12 @@ void GamepadUIMainMenu::UpdateGradients()
 {
     const float flTime = GamepadUI::GetInstance().GetTime();
     GamepadUI::GetInstance().GetGradientHelper()->ResetTargets( flTime );
+#ifdef GAMEPADUI_GAME_EZ2
+    // E:Z2 reduces the gradient so that the background map can be more easily seen
+    GamepadUI::GetInstance().GetGradientHelper()->SetTargetGradient( GradientSide::Left, { 1.0f, GamepadUI::GetInstance().IsInBackgroundLevel() ? 0.333f : 0.666f }, flTime );
+#else
     GamepadUI::GetInstance().GetGradientHelper()->SetTargetGradient( GradientSide::Left, { 1.0f, 0.666f }, flTime );
+#endif
 }
 
 void GamepadUIMainMenu::LoadMenuButtons()

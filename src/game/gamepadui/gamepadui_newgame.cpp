@@ -32,11 +32,17 @@ ConVar gamepadui_newgame_commentary_toggle( "gamepadui_newgame_commentary_toggle
 // TODO - merge these into scheme config?
 bool GameHasCommentary()
 {
+#ifdef GAMEPADUI_GAME_EZ2
+    // NOTE: Not all builds have commentary yet, so check for a file in the first map first
+    static bool bHasCommentary = g_pFullFileSystem->FileExists( "maps/ez2_c0_1_commentary.txt" );
+    return bHasCommentary;
+#else
     const char *pszGameDir = CommandLine()->ParmValue( "-game", CommandLine()->ParmValue( "-defaultgamedir", "hl2" ) );
     return !V_strcmp( pszGameDir, "episodic" ) ||
            !V_strcmp( pszGameDir, "ep2" ) ||
            !V_strcmp( pszGameDir, "portal" ) ||
            !V_strcmp( pszGameDir, "lostcoast" );
+#endif
 }
 
 bool GameHasBonusMaps()
