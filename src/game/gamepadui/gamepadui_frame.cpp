@@ -256,7 +256,8 @@ void GamepadUIFrame::OnKeyCodePressed( vgui::KeyCode code )
     case KEY_XBUTTON_Y:
         for ( int i = 0; i < FooterButtons::MaxFooterButtons; i++ )
         {
-            if ( FooterButtons::GetButtonByIdx(i) & ( FooterButtons::Apply | FooterButtons::Commentary | FooterButtons::Challenge ) )
+            if ( FooterButtons::GetButtonByIdx(i) & ( FooterButtons::Apply | FooterButtons::Commentary | FooterButtons::Challenge
+                | FooterButtons::Refresh | FooterButtons::Publish | FooterButtons::Update) )
             {
                 if ( m_pFooterButtons[i] )
                     m_pFooterButtons[i]->ForceDepressed( true );
@@ -271,7 +272,7 @@ void GamepadUIFrame::OnKeyCodePressed( vgui::KeyCode code )
     case KEY_XBUTTON_X:
         for ( int i = 0; i < FooterButtons::MaxFooterButtons; i++ )
         {
-            if ( FooterButtons::GetButtonByIdx(i) & ( FooterButtons::BonusMaps | FooterButtons::UseDefaults ) )
+            if ( FooterButtons::GetButtonByIdx(i) & ( FooterButtons::BonusMaps | FooterButtons::UseDefaults | FooterButtons::Delete ) )
             {
                 if ( m_pFooterButtons[i] )
                     m_pFooterButtons[i]->ForceDepressed( true );
@@ -334,7 +335,8 @@ void GamepadUIFrame::OnKeyCodeReleased( vgui::KeyCode code )
     case KEY_XBUTTON_Y:
         for ( int i = 0; i < FooterButtons::MaxFooterButtons; i++ )
         {
-            if ( FooterButtons::GetButtonByIdx(i) & ( FooterButtons::Apply | FooterButtons::Commentary | FooterButtons::Challenge ) )
+            if ( FooterButtons::GetButtonByIdx(i) & ( FooterButtons::Apply | FooterButtons::Commentary | FooterButtons::Challenge
+                | FooterButtons::Refresh | FooterButtons::Publish | FooterButtons::Update ) )
             {
                 if ( m_pFooterButtons[i] )
                 {
@@ -355,7 +357,7 @@ void GamepadUIFrame::OnKeyCodeReleased( vgui::KeyCode code )
     case KEY_XBUTTON_X:
         for ( int i = 0; i < FooterButtons::MaxFooterButtons; i++ )
         {
-            if ( FooterButtons::GetButtonByIdx(i) & ( FooterButtons::BonusMaps | FooterButtons::UseDefaults ) )
+            if ( FooterButtons::GetButtonByIdx(i) & ( FooterButtons::BonusMaps | FooterButtons::UseDefaults | FooterButtons::Delete ) )
             {
                 if ( m_pFooterButtons[i] )
                 {
