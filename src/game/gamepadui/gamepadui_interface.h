@@ -24,6 +24,9 @@
 #include "view_shared.h"
 #include "IGameUIFuncs.h"
 #include "steam/steam_api.h"
+#ifdef STEAM_INPUT
+#include "expanded_steam/isteaminput.h"
+#endif
 
 class GamepadUIBasePanel;
 class GamepadUIMainMenu;
@@ -69,6 +72,9 @@ public:
     ISoundEmitterSystemBase *GetSoundEmitterSystemBase() const { return m_pSoundEmitterSystemBase; }
     IVEngineClient          *GetEngineClient()           const { return m_pEngineClient; }
     IVRenderView            *GetRenderView()             const { return m_pRenderView; }
+#ifdef STEAM_INPUT
+    ISource2013SteamInput   *GetSteamInput()             const { return m_pSteamInput; }
+#endif
 
     vgui::AnimationController *GetAnimationController() const { return m_pAnimationController; }
     float GetTime() const { return Plat_FloatTime(); }
@@ -88,6 +94,11 @@ public:
     void SetCurrentChallengeNames( const char *pszFileName, const char *pszMapName, const char *pszChallengeName );
 #endif
 
+#ifdef STEAM_INPUT
+    // TODO: Replace with proper singleton interface in the future
+    void SetSteamInput( ISource2013SteamInput *pSteamInput ) override { m_pSteamInput = pSteamInput; }
+#endif
+
 private:
 
     IEngineSound            *m_pEngineSound            = NULL;
@@ -101,6 +112,10 @@ private:
 
     IGameUI                 *m_pGameUI                 = NULL;
     IAchievementMgr         *m_pAchievementMgr         = NULL;
+
+#ifdef STEAM_INPUT
+    ISource2013SteamInput   *m_pSteamInput             = NULL;
+#endif
 
     vgui::AnimationController *m_pAnimationController = NULL;
     GamepadUIBasePanel *m_pBasePanel = NULL;
