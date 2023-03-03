@@ -1,7 +1,7 @@
 #include "gamepadui_interface.h"
 #include "gamepadui_button.h"
 #include "gamepadui_frame.h"
-#include "gamepadui_scroll.h"
+#include "gamepadui_scrollbar.h"
 #include "gamepadui_image.h"
 #include "gamepadui_genericconfirmation.h"
 
@@ -963,10 +963,10 @@ private:
 
 };
 
-class GamepadUISkillySkill : public GamepadUIButton
+class GamepadUISkillySkill : public GamepadUIOptionButton
 {
 public:
-    DECLARE_CLASS_SIMPLE( GamepadUISkillySkill, GamepadUIButton );
+    DECLARE_CLASS_SIMPLE( GamepadUISkillySkill, GamepadUIOptionButton );
 
     GamepadUISkillySkill( vgui::Panel* pParent, vgui::Panel* pActionSignalTarget, const char* pSchemeFile, const char* pCommand, const char* pText, const char* pDescription, const char *pImage, int nSkill )
         : BaseClass( pParent, pActionSignalTarget, pSchemeFile, pCommand, pText, pDescription )
@@ -1641,7 +1641,7 @@ void GamepadUIOptionsPanel::LayoutCurrentTab()
     int previousySizes = 0;
     int previousxHeight = 0;
     int buttonWide = 0;
-    for ( GamepadUIButton *pButton : m_Tabs[ nActiveTab ].pButtons )
+    for ( GamepadUIOptionButton *pButton : m_Tabs[ nActiveTab ].pButtons )
     {
         int fade = 255;
 
@@ -1660,9 +1660,9 @@ void GamepadUIOptionsPanel::LayoutCurrentTab()
         }
 
         {
-            buttonY = y + previousSizes - m_Tabs[nActiveTab].ScrollState.GetScrollProgress();
+            buttonY = y + previousySizes - m_Tabs[nActiveTab].ScrollState.GetScrollProgress();
             if ( buttonY < y )
-                fade = RemapValClamped( y - buttonY, m_flOptionsFade - pButton->GetTall(), 0, 0, 255 );
+                fade = RemapValClamped( y - buttonY, abs(m_flOptionsFade - pButton->GetTall()), 0, 0, 255 );
             else if ( buttonY > ( nParentH - m_flFooterButtonsOffsetY - m_nFooterButtonHeight - m_flOptionsFade ) )
                 fade = RemapValClamped( ( nParentH - m_flFooterButtonsOffsetY - m_nFooterButtonHeight ) - ( buttonY + pButton->GetTall() ), 0, m_flOptionsFade, 0, 255 );
             if ( ( pButton->HasFocus() && pButton->IsEnabled() ) && fade != 0 )
