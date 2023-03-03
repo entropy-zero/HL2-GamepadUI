@@ -59,6 +59,11 @@ $Project
             $File "igamepadui.h"
         }
 
+        $Folder "Common"
+        {
+			$File "$SRCDIR\common\img_png_loader.h"
+        }
+
         $File "gamepadui_basepanel.h"
         $File "gamepadui_button.h"
         $File "gamepadui_frame.h"
@@ -79,6 +84,7 @@ $Project
         {
             $File "$SRCDIR\public\vgui_controls\vgui_controls.cpp"
             $File "$SRCDIR\common\language.cpp"
+            $File "$SRCDIR\common\img_png_loader.cpp"
         }
 
         $File "gamepadui_achievements.cpp"
@@ -105,6 +111,10 @@ $Project
         $Lib  tier3
         $Lib  vgui_controls
         $Lib  vtf
+
+		$Lib  expanded_steam [$STEAM_INPUT]
+		$ImpLib  steam_api [$STEAM_INPUT]
+		$Lib "$LIBCOMMON\libpng" [$STEAM_INPUT]
 
 		// these are only necessary if HL2_RETAIL is enabled.
         $ImpLib  steam_api [$HL2_RETAIl]

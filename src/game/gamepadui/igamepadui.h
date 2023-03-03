@@ -9,6 +9,8 @@
 #include "mathlib/vector.h"
 #include "ivrenderview.h"
 
+class ISource2013SteamInput;
+
 abstract_class IGamepadUI : public IBaseInterface
 {
 public:
@@ -19,6 +21,9 @@ public:
     virtual void OnLevelInitializePreEntity() = 0;
     virtual void OnLevelInitializePostEntity() = 0;
     virtual void OnLevelShutdown() = 0;
+	
+    // TODO: Replace with proper singleton interface in the future
+    virtual void SetSteamInput( ISource2013SteamInput *pSteamInput ) = 0;
 };
 
 #define GAMEPADUI_INTERFACE_VERSION "GamepadUI001"

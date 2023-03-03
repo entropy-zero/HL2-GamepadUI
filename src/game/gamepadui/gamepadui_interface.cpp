@@ -62,7 +62,7 @@ void GamepadUI::Initialize( CreateInterfaceFn factory )
     g_pVGuiLocalize->AddFile( "resource/gameui_%language%.txt", "GAME", true );
     g_pVGuiLocalize->AddFile( "resource/deck_%language%.txt", "GAME", true );
 
-#ifdef HL2_RETAIL // not necessary on SDK2013 (Madi)
+#if defined(HL2_RETAIL) || defined(STEAM_INPUT)
     SteamAPI_InitSafe();
     SteamAPI_SetTryCatchCallbacks( false );
     m_SteamAPIContext.Init();
@@ -93,7 +93,7 @@ void GamepadUI::Shutdown()
     if ( m_pBasePanel )
         m_pBasePanel->DeletePanel();
 
-#ifdef HL2_RETAIL // not necessary on SDK2013 (Madi)
+#if defined(HL2_RETAIL) || defined(STEAM_INPUT)
     m_SteamAPIContext.Clear();
 #endif
 

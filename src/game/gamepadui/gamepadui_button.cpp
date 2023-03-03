@@ -152,8 +152,13 @@ int GamepadUIButton::PaintText()
         nTextPosY = m_flHeight / 2 - nTextSizeY / 2 + m_flTextOffsetY;
     }
 
-#ifdef HL2_RETAIL // Steam input and Steam Controller are not supported in SDK2013 (Madi)
+#if defined(HL2_RETAIL) || defined(STEAM_INPUT)
+
+#if defined(HL2_RETAIL) // Steam input and Steam Controller are not supported in SDK2013 (Madi)
     if ( g_pInputSystem->IsSteamControllerActive() )
+#else
+    if (GamepadUI::GetInstance().GetSteamInput()->IsEnabled() && GamepadUI::GetInstance().GetSteamInput()->UseGlyphs())
+#endif
     {
         const int nGlyphSize = m_flHeight * 0.80f;
         if ( m_glyph.SetupGlyph( nGlyphSize, FooterButtons::GetButtonActionHandleString( m_eFooterButton ) ) )
@@ -358,7 +363,9 @@ void GamepadUIButton::NavigateFrom()
 
 void GamepadUIButton::OnCursorEntered()
 {
-#ifdef HL2_RETAIL // Steam input and Steam Controller are not supported in SDK2013 (Madi)
+#ifdef STEAM_INPUT
+    if ( GamepadUI::GetInstance().GetSteamInput()->IsEnabled() || !IsEnabled() )
+#elif defined(HL2_RETAIL) // Steam input and Steam Controller are not supported in SDK2013 (Madi)
     if ( g_pInputSystem->IsSteamControllerActive() || !IsEnabled() )
 #else
     if ( !IsEnabled() )
