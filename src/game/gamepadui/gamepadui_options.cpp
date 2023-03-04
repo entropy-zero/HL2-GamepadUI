@@ -1734,8 +1734,8 @@ void GamepadUIOptionsPanel::LayoutCurrentTab()
 	
     int yMax = 0;
     {
-        if (previousSizes > m_flScrollBarHeight)
-            yMax = previousSizes - m_flScrollBarHeight;
+        if (previousySizes > m_flScrollBarHeight)
+            yMax = previousySizes - m_flScrollBarHeight;
         m_Tabs[ nActiveTab ].ScrollState.UpdateScrollBounds( 0.0f, yMax );
 
         m_pScrollBar->InitScrollBar( &m_Tabs[nActiveTab].ScrollState,
