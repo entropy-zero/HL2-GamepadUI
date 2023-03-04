@@ -646,7 +646,7 @@ void GamepadUIBonusMapsPanel::LayoutBonusButtons()
     int nParentW, nParentH;
 	GetParent()->GetSize( nParentW, nParentH );
 
-    float flScrollClamp = ((float)m_pBonusButtons[0]->GetTall() + m_BonusSpacing) * max(1.0f, ceilf(((float)m_pBonusButtons.Count() - m_nBonusRowSize*2) / ((float)m_nBonusRowSize)) );
+    float flScrollClamp = ((float)m_pBonusButtons[0]->GetTall() + m_BonusSpacing) * Max(1.0f, ceilf(((float)m_pBonusButtons.Count() - m_nBonusRowSize*2) / ((float)m_nBonusRowSize)) );
 
     m_ScrollState.UpdateScrollBounds( 0.0f, flScrollClamp );
 

@@ -250,7 +250,7 @@ public:
 #if defined(GAMEPADUI) && defined(CLIENT_DLL)
 		// This is overridden by GamepadUI instead
 		CreateInterfaceFn gamepadUIFactory = g_GamepadUI.GetFactory();
-		if ( gameUIFactory )
+		if ( gamepadUIFactory )
 		{
 			m_pGamepadUI = (IGamepadUI *) gamepadUIFactory(GAMEPADUI_INTERFACE_VERSION, NULL );
 		}
