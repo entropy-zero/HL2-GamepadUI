@@ -282,14 +282,16 @@ public:
     {
         BaseClass::ApplySchemeSettings( pScheme );
 
-        if (GamepadUI::GetInstance().GetScreenRatio() != 1.0f)
+        float flX, flY;
+        if (GamepadUI::GetInstance().GetScreenRatio( flX, flY ))
         {
-            float flScreenRatio = GamepadUI::GetInstance().GetScreenRatio();
-
-            // For now, undo the scaling from base class
-            m_flWidth /= flScreenRatio;
-            for (int i = 0; i < ButtonStates::Count; i++)
-                m_flWidthAnimationValue[i] /= flScreenRatio;
+            if (flX != 1.0f)
+            {
+                // For now, undo the scaling from base class
+                m_flWidth /= flX;
+                for (int i = 0; i < ButtonStates::Count; i++)
+                    m_flWidthAnimationValue[i] /= flX;
+            }
 
             SetSize( m_flWidth, m_flHeight + m_flExtraHeight );
             DoAnimations( true );
@@ -388,7 +390,7 @@ GamepadUIBonusButton* GamepadUIBonusButton::s_pLastBonusButton = NULL;
 
 GamepadUIBonusMapsPanel::GamepadUIBonusMapsPanel( vgui::Panel *pParent, const char* PanelName ) : BaseClass( pParent, PanelName )
 {
-    vgui::HScheme hScheme = vgui::scheme()->LoadSchemeFromFile( GAMEPADUI_DEFAULT_PANEL_SCHEME, "SchemePanel" );
+    vgui::HScheme hScheme = vgui::scheme()->LoadSchemeFromFileEx( GamepadUI::GetInstance().GetSizingVPanel(), GAMEPADUI_DEFAULT_PANEL_SCHEME, "SchemePanel" );
     SetScheme( hScheme );
 
     FooterButtonMask buttons = FooterButtons::Back | FooterButtons::Select;
@@ -426,11 +428,21 @@ void GamepadUIBonusMapsPanel::ApplySchemeSettings( vgui::IScheme* pScheme )
     m_hGoalFont = pScheme->GetFont( "Goal.Font", true );
     m_hDescFont = pScheme->GetFont( "BonusDesc.Font", true );
 
-    if (GamepadUI::GetInstance().GetScreenRatio() != 1.0f)
+    float flX, flY;
+    if (GamepadUI::GetInstance().GetScreenRatio( flX, flY ))
     {
-        float flScreenRatio = GamepadUI::GetInstance().GetScreenRatio();
+        m_BonusOffsetX *= flX;
+    }
+    
+    int nX, nY;
+    GamepadUI::GetInstance().GetSizingPanelOffset( nX, nY );
+    if (nX > 0)
+    {
+        GamepadUI::GetInstance().GetSizingPanelScale( flX, flY );
+        flX *= 0.5f;
 
-        m_BonusOffsetX *= flScreenRatio;
+        m_BonusOffsetX += ((float)nX) * flX;
+        m_flBonusFade += ((float)nX) * flX;
     }
 }
 

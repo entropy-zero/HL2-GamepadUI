@@ -170,18 +170,20 @@ public:
     {
         BaseClass::ApplySchemeSettings( pScheme );
 
-        if (GamepadUI::GetInstance().GetScreenRatio() != 1.0f)
+        float flX, flY;
+        if (GamepadUI::GetInstance().GetScreenRatio( flX, flY ))
         {
-            float flScreenRatio = GamepadUI::GetInstance().GetScreenRatio();
+            if (flX != 1.0f)
+            {
+                m_flHeight *= flX;
+                for (int i = 0; i < ButtonStates::Count; i++)
+                    m_flHeightAnimationValue[i] *= flX;
 
-            m_flHeight *= flScreenRatio;
-            for (int i = 0; i < ButtonStates::Count; i++)
-                m_flHeightAnimationValue[i] *= flScreenRatio;
-
-            // Also change the text offset
-            m_flTextOffsetY *= flScreenRatio;
-            for (int i = 0; i < ButtonStates::Count; i++)
-                m_flTextOffsetYAnimationValue[i] *= flScreenRatio;
+                // Also change the text offset
+                m_flTextOffsetY *= flX;
+                for (int i = 0; i < ButtonStates::Count; i++)
+                    m_flTextOffsetYAnimationValue[i] *= flX;
+            }
 
             SetSize( m_flWidth, m_flHeight + m_flExtraHeight );
             DoAnimations( true );
@@ -279,7 +281,7 @@ static int GetUnlockedChapters()
 
 GamepadUINewGamePanel::GamepadUINewGamePanel( vgui::Panel *pParent, const char* PanelName ) : BaseClass( pParent, PanelName )
 {
-    vgui::HScheme hScheme = vgui::scheme()->LoadSchemeFromFile( GAMEPADUI_DEFAULT_PANEL_SCHEME, "SchemePanel" );
+    vgui::HScheme hScheme = vgui::scheme()->LoadSchemeFromFileEx( GamepadUI::GetInstance().GetSizingVPanel(), GAMEPADUI_DEFAULT_PANEL_SCHEME, "SchemePanel" );
     SetScheme( hScheme );
 
     GetFrameTitle() = GamepadUIString( "#GameUI_NewGame" );
@@ -374,10 +376,11 @@ void GamepadUINewGamePanel::ApplySchemeSettings( vgui::IScheme* pScheme )
 {
     BaseClass::ApplySchemeSettings( pScheme );
 
-    if (GamepadUI::GetInstance().GetScreenRatio() != 1.0f)
+    float flX, flY;
+    if (GamepadUI::GetInstance().GetScreenRatio( flX, flY ))
     {
-        float flScreenRatio = GamepadUI::GetInstance().GetScreenRatio();
-        m_ChapterOffsetX *= (flScreenRatio*flScreenRatio);
+        m_ChapterOffsetX *= (flX*flX);
+        m_ChapterOffsetX *= (flY*flY);
     }
 
     m_pScrollBar->InitScrollBar( &m_ScrollState, m_ChapterOffsetX, m_ChapterOffsetY + m_pChapterButtons[0]->GetTall() + m_ChapterSpacing );

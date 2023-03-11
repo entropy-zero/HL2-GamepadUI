@@ -14,7 +14,7 @@ GamepadUIGenericConfirmationPanel::GamepadUIGenericConfirmationPanel( vgui::Pane
     , m_pCommand( std::move( pCommand ) )
     , m_pszGenericConfirmationFontName( bSmallFont ? "Generic.Text.Font" : "GenericConfirmation.Font" )
 {
-    vgui::HScheme hScheme = vgui::scheme()->LoadSchemeFromFile( GAMEPADUI_DEFAULT_PANEL_SCHEME, "SchemePanel" );
+    vgui::HScheme hScheme = vgui::scheme()->LoadSchemeFromFileEx( GamepadUI::GetInstance().GetSizingVPanel(), GAMEPADUI_DEFAULT_PANEL_SCHEME, "SchemePanel" );
     SetScheme( hScheme );
 
     GetFrameTitle() = GamepadUIString( pTitle );
@@ -34,7 +34,7 @@ GamepadUIGenericConfirmationPanel::GamepadUIGenericConfirmationPanel( vgui::Pane
     , m_pCommand( std::move( pCommand ) )
     , m_pszGenericConfirmationFontName( bSmallFont ? "Generic.Text.Font" : "GenericConfirmation.Font" )
 {
-    vgui::HScheme hScheme = vgui::scheme()->LoadSchemeFromFile( GAMEPADUI_DEFAULT_PANEL_SCHEME, "SchemePanel" );
+    vgui::HScheme hScheme = vgui::scheme()->LoadSchemeFromFileEx( GamepadUI::GetInstance().GetSizingVPanel(), GAMEPADUI_DEFAULT_PANEL_SCHEME, "SchemePanel" );
     SetScheme( hScheme );
 
     GetFrameTitle() = GamepadUIString( pTitle );
