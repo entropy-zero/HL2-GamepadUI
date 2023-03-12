@@ -1532,7 +1532,7 @@ GamepadUIOptionsPanel::GamepadUIOptionsPanel( vgui::Panel* pParent, const char* 
 {
     s_pOptionsPanel = this;
 
-    vgui::HScheme Scheme = vgui::scheme()->LoadSchemeFromFile( GAMEPADUI_DEFAULT_PANEL_SCHEME, "SchemePanel" );
+    vgui::HScheme Scheme = vgui::scheme()->LoadSchemeFromFileEx( GamepadUI::GetInstance().GetSizingVPanel(), GAMEPADUI_DEFAULT_PANEL_SCHEME, "SchemePanel" );
     SetScheme( Scheme );
 
     GetFrameTitle() = GamepadUIString( "#GameUI_Options" );
@@ -2493,12 +2493,21 @@ void GamepadUIOptionsPanel::ApplySchemeSettings( vgui::IScheme* pScheme )
     BaseClass::ApplySchemeSettings( pScheme );
     
     m_hDescFont = pScheme->GetFont( "Button.Description.Font", true );
-    
-    if (GamepadUI::GetInstance().GetScreenRatio() != 1.0f)
+
+    float flX, flY;
+    if (GamepadUI::GetInstance().GetScreenRatio( flX, flY ))
     {
-        float flScreenRatio = GamepadUI::GetInstance().GetScreenRatio();
-        m_flTabsOffsetX *= (flScreenRatio * flScreenRatio);
-        m_flScrollBarOffsetX *= (flScreenRatio);
+        m_flTabsOffsetX *= (flX * flX);
+        m_flScrollBarOffsetX *= (flX);
+    }
+
+    int nX, nY;
+    GamepadUI::GetInstance().GetSizingPanelOffset( nX, nY );
+    if (nX > 0)
+    {
+        GamepadUI::GetInstance().GetSizingPanelScale( flX, flY );
+        m_flTabsOffsetX += ((float)nX) * flX * 0.5f;
+        m_flScrollBarOffsetX += ((float)nX) * flX * 0.1f;
     }
 }
 
