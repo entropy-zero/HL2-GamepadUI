@@ -23,5 +23,6 @@ $Project "GamepadUI (EZ2)"
 	$Folder	"Source Files"
 	{
 		$File	"gamepadui_bonusmaps.cpp"
+		$File	"gamepadui_workshop_publish.cpp"
 	}
 }

@@ -7,6 +7,9 @@
 #include "vgui_controls/Panel.h"
 #include "bitmap/tgaloader.h"
 
+#include "img_png_loader.h"
+#include "img_jpeg_loader.h"
+
 class GamepadUIImage
 {
 public:
@@ -51,6 +54,58 @@ public:
 #else
         g_pMatSystemSurface->DrawSetTextureRGBAEx( m_nId, tga.Base(), nWidth, nHeight, IMAGE_FORMAT_RGBA8888 );
 #endif
+    }
+    void SetPNGImage( const char* pName )
+    {
+        Cleanup();
+
+        CUtlMemory< byte > image;
+        int nWidth, nHeight;
+        if ( !PNGtoRGBA( g_pFullFileSystem, pName, image, nWidth, nHeight ) )
+            return;
+
+        m_nId = vgui::surface()->CreateNewTextureID( true );
+
+        g_pMatSystemSurface->DrawSetTextureRGBAEx( m_nId, image.Base(), nWidth, nHeight, IMAGE_FORMAT_RGBA8888 );
+    }
+    void SetPNGImage( CUtlBuffer &file )
+    {
+        Cleanup();
+
+        CUtlMemory< byte > image;
+        int nWidth, nHeight;
+        if ( !PNGtoRGBA( file, image, nWidth, nHeight ) )
+            return;
+
+        m_nId = vgui::surface()->CreateNewTextureID( true );
+
+        g_pMatSystemSurface->DrawSetTextureRGBAEx( m_nId, image.Base(), nWidth, nHeight, IMAGE_FORMAT_RGBA8888 );
+    }
+    void SetJPEGImage( const char* pName )
+    {
+        Cleanup();
+
+        CUtlMemory< byte > image;
+        int nWidth, nHeight;
+        if ( !JPEGtoRGBA( g_pFullFileSystem, pName, image, nWidth, nHeight ) )
+            return;
+
+        m_nId = vgui::surface()->CreateNewTextureID( true );
+
+        g_pMatSystemSurface->DrawSetTextureRGBAEx( m_nId, image.Base(), nWidth, nHeight, IMAGE_FORMAT_RGBA8888 );
+    }
+    void SetJPEGImage( CUtlBuffer &file )
+    {
+        Cleanup();
+
+        CUtlMemory< byte > image;
+        int nWidth, nHeight;
+        if ( !JPEGtoRGBA( file, image, nWidth, nHeight ) )
+            return;
+
+        m_nId = vgui::surface()->CreateNewTextureID( true );
+
+        g_pMatSystemSurface->DrawSetTextureRGBAEx( m_nId, image.Base(), nWidth, nHeight, IMAGE_FORMAT_RGBA8888 );
     }
     bool IsValid()
     {

@@ -44,10 +44,16 @@ namespace FooterButtons
         Challenge  = ( 1 << 8 ),
         UseDefaults  = ( 1 << 9 ),
 
+        // Workshop Publisher
+        Refresh  = ( 1 << 10 ),
+        Publish  = ( 1 << 11 ),
+        Update  = ( 1 << 12 ),
+        Delete  = ( 1 << 13 ),
+
         // Buttons that are 'confirmatory'
         ConfirmMask = ( LeftSelect | Select | Okay ),
     };
-    static const int MaxFooterButtons = 10;
+    static const int MaxFooterButtons = 14;
 
     inline const char* GetButtonName( FooterButton button )
     {
@@ -63,6 +69,11 @@ namespace FooterButtons
             case BonusMaps: return "#Deck_BonusMaps";
             case Challenge: return "#Deck_Challenges";
             case UseDefaults: return "#GameUI_UseDefaults";
+
+            case Refresh: return "#GameUI_Refresh";
+            case Publish: return "#WorkshopMgr_ButtonPublish";
+            case Update: return "#WorkshopMgr_ButtonUpdate";
+            case Delete: return "#GameUI_Delete";
         }
         return "Unknown";
     }
@@ -81,6 +92,11 @@ namespace FooterButtons
             case BonusMaps: return "action_bonus_maps";
             case Challenge: return "action_challenges";
             case UseDefaults: return "action_usedefaults";
+
+            case Refresh: return "action_refresh";
+            case Publish: return "action_publish";
+            case Update: return "action_update";
+            case Delete: return "action_delete";
         }
         return "";
     }
@@ -99,6 +115,11 @@ namespace FooterButtons
             case BonusMaps: return "menu_x";
             case Challenge: return "menu_y";
             case UseDefaults: return "menu_x";
+
+            case Refresh: return "menu_y";
+            case Publish: return "menu_y";
+            case Update: return "menu_y";
+            case Delete: return "menu_x";
         }
         return "";
     }
