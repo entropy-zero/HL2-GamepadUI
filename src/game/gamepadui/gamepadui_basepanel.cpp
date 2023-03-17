@@ -18,6 +18,8 @@
 #include "tier0/memdbgon.h"
 
 ConVar gamepadui_background_music_duck( "gamepadui_background_music_duck", "0.35", FCVAR_ARCHIVE );
+ConVar gamepadui_sizing_panel_width( "gamepadui_sizing_panel_width", "1280", FCVAR_ARCHIVE );
+ConVar gamepadui_sizing_panel_height( "gamepadui_sizing_panel_height", "800", FCVAR_ARCHIVE );
 
 GamepadUIBasePanel::GamepadUIBasePanel( vgui::VPANEL parent ) : BaseClass( NULL, "GamepadUIBasePanel" )
 {
@@ -210,8 +212,8 @@ void GamepadUISizingPanel::ApplySchemeSettings( vgui::IScheme* pScheme )
     float flX, flY;
     GamepadUI::GetInstance().GetScreenRatio( flX, flY );
 
-    float targetW = 1280.0f * flX;
-    float targetH = 800.0f * flY;
+    float targetW = gamepadui_sizing_panel_width.GetFloat() * flX;
+    float targetH = gamepadui_sizing_panel_height.GetFloat() * flY;
 
     w -= targetW;
     h -= targetH;

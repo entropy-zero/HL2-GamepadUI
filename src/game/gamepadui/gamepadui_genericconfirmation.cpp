@@ -9,6 +9,8 @@
 
 #include "tier0/memdbgon.h"
 
+ConVar gamepadui_center_confirmation_panels( "gamepadui_center_confirmation_panels", "1", FCVAR_NONE, "Centers confirmation panels" );
+
 GamepadUIGenericConfirmationPanel::GamepadUIGenericConfirmationPanel( vgui::Panel *pParent, const char* pPanelName, const char* pTitle, const char* pText, std::function<void()> pCommand, bool bSmallFont, bool bShowCancel )
     : BaseClass( pParent, pPanelName )
     , m_pCommand( std::move( pCommand ) )
@@ -54,6 +56,22 @@ void GamepadUIGenericConfirmationPanel::ApplySchemeSettings( vgui::IScheme* pSch
     BaseClass::ApplySchemeSettings( pScheme );
 
     m_hGenericConfirmationFont = pScheme->GetFont( m_pszGenericConfirmationFontName, true );
+
+    if ( !m_strText.IsEmpty() && gamepadui_center_confirmation_panels.GetBool() )
+    {
+        int nTall = DrawPrintWrappedText( m_hGenericConfirmationFont, m_flGenericConfirmationOffsetX, m_flGenericConfirmationOffsetY, m_strText.String(), m_strText.Length(), GetWide() - 2 * m_flGenericConfirmationOffsetX, false );
+
+        int nParentW, nParentH;
+        GetParent()->GetSize( nParentW, nParentH );
+
+        int nYOffset = (nParentH / 2 - nTall / 2) - (m_flTitleOffsetY * 0.5f);
+
+        m_flFooterButtonsOffsetY = (nYOffset - m_flTitleOffsetY);
+        m_flFooterButtonsOffsetX *= 3;
+
+        m_flTitleOffsetY = nYOffset - (m_flGenericConfirmationOffsetY - m_flTitleOffsetY);
+        m_flGenericConfirmationOffsetY = nYOffset;
+    }
 }
 
 void GamepadUIGenericConfirmationPanel::PaintText()

@@ -1242,6 +1242,7 @@ void GamepadUIBonusMapsPanel::LoadBonusMapDir( const char *pszDir, BonusMapDescr
 
     int iFolder = m_Bonuses.AddToTail();
     m_Bonuses[iFolder].bIsFolder = true;
+    m_Bonuses[iFolder].bComplete = false;
     m_Bonuses[iFolder].bLocked = pFolderInfoKV->GetBool( "lock" );
     Q_strncpy( m_Bonuses[iFolder].szMapName, pFolderInfoKV->GetName(), sizeof( m_Bonuses[iFolder].szMapName ) );
     Q_strncpy( m_Bonuses[iFolder].szImageName, pFolderInfoKV->GetString( "image" ), sizeof( m_Bonuses[iFolder].szImageName ) );
@@ -1274,6 +1275,7 @@ void GamepadUIBonusMapsPanel::LoadBonusMap( const char *pszMapList, BonusMapDesc
         int i = m_Bonuses.AddToTail();
 
         m_Bonuses[i].bIsFolder = false;
+        m_Bonuses[i].bComplete = false;
         m_Bonuses[i].bLocked = pSubKey->GetBool( "lock" );
         Q_strncpy( m_Bonuses[i].szMapName, pSubKey->GetName(), sizeof( m_Bonuses[i].szMapName ) );
         Q_strncpy( m_Bonuses[i].szMapFileName, pSubKey->GetString( "map" ), sizeof( m_Bonuses[i].szMapFileName ) );

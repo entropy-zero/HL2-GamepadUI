@@ -29,6 +29,9 @@ public:
     void OnMousePressed( vgui::MouseCode code ) OVERRIDE;
     void OnMouseReleased( vgui::MouseCode code ) OVERRIDE;
 
+    void OnKeyCodePressed( vgui::KeyCode code ) OVERRIDE;
+    void OnKeyCodeReleased( vgui::KeyCode code ) OVERRIDE;
+
 private:
     int m_nStartX = 0;
     int m_nStartY = 0;
@@ -40,8 +43,11 @@ private:
     GamepadUIScrollState *m_pScrollState = NULL;
 
     int m_nMouseOffset = -1;
+    int m_flKeyDir = 0;
 
     bool m_bHorizontal = false;
+
+    GAMEPADUI_PANEL_PROPERTY( float, m_flScrollSpeed, "ScrollBar.Speed", "64", SchemeValueTypes::ProportionalFloat );
 };
 
 #endif // GAMEPADUI_SCROLLBAR_H

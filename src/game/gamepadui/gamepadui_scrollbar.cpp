@@ -42,6 +42,10 @@ void GamepadUIScrollBar::OnThink()
             m_pScrollState->SetScrollTarget( flRatio * m_flMax, GamepadUI::GetInstance().GetTime() );
         }
     }
+    else if (m_flKeyDir != 0)
+    {
+        m_pScrollState->SetScrollTarget( m_pScrollState->GetScrollProgress() + m_flKeyDir, GamepadUI::GetInstance().GetTime() );
+    }
 
     if (m_flMax > 0.0f)
     {
@@ -117,4 +121,40 @@ void GamepadUIScrollBar::OnMouseReleased( vgui::MouseCode code )
     BaseClass::OnMouseReleased( code );
 
     m_nMouseOffset = -1;
+}
+
+void GamepadUIScrollBar::OnKeyCodePressed( vgui::KeyCode code )
+{
+    ButtonCode_t buttonCode = GetBaseButtonCode( code );
+
+    switch ( buttonCode )
+    {
+        case KEY_UP:
+        case KEY_XBUTTON_UP:
+            m_flKeyDir = -m_flScrollSpeed;
+            break;
+        case KEY_DOWN:
+        case KEY_XBUTTON_DOWN:
+            m_flKeyDir = m_flScrollSpeed;
+            break;
+        default:
+            return BaseClass::OnKeyCodePressed( code );
+    }
+}
+
+void GamepadUIScrollBar::OnKeyCodeReleased( vgui::KeyCode code )
+{
+    ButtonCode_t buttonCode = GetBaseButtonCode( code );
+
+    switch ( buttonCode )
+    {
+        case KEY_UP:
+        case KEY_XBUTTON_UP:
+        case KEY_DOWN:
+        case KEY_XBUTTON_DOWN:
+            m_flKeyDir = 0;
+            break;
+        default:
+            return BaseClass::OnKeyCodeReleased( code );
+    }
 }
