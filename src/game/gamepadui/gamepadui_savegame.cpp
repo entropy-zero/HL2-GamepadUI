@@ -47,7 +47,7 @@ public:
 	bool InDeleteMode() { return m_pDeletePanels.Count() > 0; }
 
 #ifdef GAMEPADUI_GAME_EZ2
-	const char *IsSaveSuspect( const char *pszEZ2Version, const char *pszMapName, int nMapVersion );
+	bool IsSaveSuspect( const char *pszEZ2Version, const char *pszMapName, int nMapVersion, const char **ppszIncompatibleVersion, const char **ppszLastCompatibleBranch );
 
     GamepadUIImage &GetWilsonThumb( float &flSize, float &flOffsetX, float &flOffsetY )
     {
@@ -177,8 +177,7 @@ public:
 
 		char szVersion[8];
 		V_UnicodeToUTF8( m_strEZ2Version.String(), szVersion, sizeof( szVersion ) );
-		m_pIncompatibleVersion = static_cast<GamepadUISaveGamePanel *>(GetParent())->IsSaveSuspect( szVersion, m_pSaveGame->szMapName, m_pSaveGame->nMapVersion );
-		if ( m_pIncompatibleVersion )
+		if ( static_cast<GamepadUISaveGamePanel *>(GetParent())->IsSaveSuspect( szVersion, m_pSaveGame->szMapName, m_pSaveGame->nMapVersion, &m_pIncompatibleVersion, &m_pLastCompatibleBranch ) )
 		{
 			// For now, correspond suspect colors to over and out states
 			m_colBackgroundColorAnimationValue[ButtonStates::Over] = m_colSuspectSaveBackground;
@@ -266,6 +265,11 @@ public:
 	{
 		return m_pIncompatibleVersion;
 	}
+
+	const char *GetLastCompatibleBranch() const
+	{
+		return m_pLastCompatibleBranch;
+	}
 #endif
 
 private:
@@ -274,7 +278,9 @@ private:
 	const SaveGameDescription_t *m_pSaveGame;
 #ifdef GAMEPADUI_GAME_EZ2
 	GamepadUIString m_strEZ2Version;
+
 	const char *m_pIncompatibleVersion = NULL;
+	const char *m_pLastCompatibleBranch = NULL;
 
 	GAMEPADUI_PANEL_PROPERTY( Color, m_colSuspectSaveBackground, "Button.Background.SuspectSave", "255 128 0 255", SchemeValueTypes::Color );
 	GAMEPADUI_PANEL_PROPERTY( Color, m_colSuspectSaveText, "Button.Text.SuspectSave", "255 128 0 255", SchemeValueTypes::Color );
@@ -755,7 +761,7 @@ static int CompareVersions( const char *pszVersion1, const char *pszVersion2 )
 	CUtlStringList szVersionNums2;
 	V_SplitString( pszVersion2, ".", szVersionNums2 );
 
-	Assert( szVersionNums1.Count() == szVersionNums2.Count() );
+	Assert( szVersionNums1.Count() >= szVersionNums2.Count() );
 
 	int nReturn = 0;
 	for (int i = 0; i < szVersionNums1.Count(); i++)
@@ -791,34 +797,54 @@ void GamepadUISaveGamePanel::UnloadVersionHistory()
 	m_pVersionHistory->deleteThis();
 }
 
-const char *GamepadUISaveGamePanel::IsSaveSuspect( const char *pszEZ2Version, const char *pszMapName, int nMapVersion )
+bool GamepadUISaveGamePanel::IsSaveSuspect( const char *pszEZ2Version, const char *pszMapName, int nMapVersion, const char **ppszIncompatibleVersion, const char **ppszLastCompatibleBranch )
 {
+	if (!(pszEZ2Version && *pszEZ2Version))
+	{
+		// Placeholder version for updates which predate this system
+		pszEZ2Version = "0.0.0";
+	}
+
 	if (m_pVersionHistory)
 	{
 		KeyValues *pVersionKey = m_pVersionHistory->GetFirstSubKey();
 		while (pVersionKey)
 		{
-			if (CompareVersions( pszEZ2Version, pVersionKey->GetName() ) == 1)
+			int iVerCompare = CompareVersions( pVersionKey->GetName(), pszEZ2Version );
+			if (iVerCompare == -1)
 			{
+				// Newer version of E:Z2 than the save game's
+
+				// Check if this version breaks all previous versions
+				if (pVersionKey->GetBool( "universal" ))
+				{
+					*ppszIncompatibleVersion = pVersionKey->GetName();
+					return true;
+				}
+
+				// Check for incompatible maps
 				KeyValues *pMaps = pVersionKey->FindKey( "maps" );
 				if (pMaps)
 				{
 					KeyValues *pMapKey = pMaps->FindKey( pszMapName );
 					if (pMapKey)
 					{
-						return pMapKey->GetName();
-
-						//if (pMapKey->GetInt( "mapversion" ) != nMapVersion)
-						//	return pMapKey->GetName();
+						*ppszIncompatibleVersion = pVersionKey->GetName();
+						return true;
 					}
 				}
+			}
+			else if (iVerCompare == 0)
+			{
+				// Matching version of E:Z2
+				*ppszLastCompatibleBranch = pVersionKey->GetString( "branch", "release-1.5" ); // Failsafe
 			}
 
 			pVersionKey = pVersionKey->GetNextKey();
 		}
 	}
 
-	return NULL;
+	return false;
 }
 #endif
 
@@ -1092,11 +1118,17 @@ void GamepadUISaveGamePanel::OnCommand( char const* pCommand )
 #ifdef GAMEPADUI_GAME_EZ2
 					if (panel->GetIncompatibleVersion())
 					{
-						new GamepadUIGenericConfirmationPanel( this, "IncompatibleVersionConfirmationPanel", "#GameUI_IncompatibleVersion_Title", "#GameUI_IncompatibleVersion_Info",
+						wchar_t wszLastCompatibleBranch[ 16 ];
+						V_UTF8ToUnicode( panel->GetLastCompatibleBranch(), wszLastCompatibleBranch, sizeof( wszLastCompatibleBranch ) );
+						
+						wchar_t buf[ 512 ];
+						g_pVGuiLocalize->ConstructString( buf, sizeof(buf), g_pVGuiLocalize->Find("#GameUI_IncompatibleVersion_Info"), 1, wszLastCompatibleBranch );
+						
+						new GamepadUIGenericConfirmationPanel( this, "IncompatibleVersionConfirmationPanel", g_pVGuiLocalize->Find( "#GameUI_IncompatibleVersion_Title" ), buf,
 						[this, pSave]()
 						{
 							LoadGame( pSave );
-						} );
+						}, true );
 					}
 					else
 #endif
