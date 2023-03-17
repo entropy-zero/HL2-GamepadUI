@@ -20,6 +20,8 @@
 
 #include "tier0/memdbgon.h"
 
+ConVar gamepadui_savegame_use_delete_mode( "gamepadui_savegame_use_delete_mode", "1", FCVAR_NONE, "Causes the save game panel to use a \"delete mode\" when not using a controller, showing X buttons next to each save game" );
+
 class GamepadUISaveButton;
 struct SaveGameDescription_t;
 
@@ -38,6 +40,8 @@ public:
     void OnCommand( char const* pCommand ) OVERRIDE;
     void OnMouseWheeled( int nDelta ) OVERRIDE;
 
+	bool InDeleteMode() { return m_pDeletePanels.Count() > 0; }
+
     MESSAGE_FUNC_HANDLE( OnGamepadUIButtonNavigatedTo, "OnGamepadUIButtonNavigatedTo", button );
 
 private:
@@ -55,10 +59,12 @@ private:
 
     CUtlVector<GamepadUISaveButton*> m_pSavePanels;
     CUtlVector<SaveGameDescription_t> m_Saves;
+	
+    CUtlVector<GamepadUIButton*> m_pDeletePanels;
 
     GamepadUIScrollState m_ScrollState;
 
-	GamepadUIScrollBar *m_pScrollBar;
+	GamepadUIScrollBar *m_pScrollBar = NULL;
 
     bool m_bIsSave;
 
@@ -191,18 +197,7 @@ GamepadUISaveGamePanel::GamepadUISaveGamePanel( vgui::Panel* pParent, const char
     if ( m_pSavePanels.Count() )
         m_pSavePanels[0]->NavigateTo();
 
-    for ( int i = 1; i < m_pSavePanels.Count(); i++ )
-    {
-        m_pSavePanels[i]->SetNavUp( m_pSavePanels[i - 1] );
-        m_pSavePanels[i - 1]->SetNavDown( m_pSavePanels[i] );
-    }
-
 	UpdateGradients();
-
-    m_pScrollBar = new GamepadUIScrollBar(
-        this, this,
-        GAMEPADUI_RESOURCE_FOLDER "schemescrollbar.res",
-        NULL, false );
 }
 
 void GamepadUISaveGamePanel::UpdateGradients()
@@ -217,11 +212,18 @@ void GamepadUISaveGamePanel::ApplySchemeSettings( vgui::IScheme *pScheme )
 {
 	BaseClass::ApplySchemeSettings( pScheme );
 
+	m_bFooterButtonsStack = true;
+
+	float flX, flY;
+    if (GamepadUI::GetInstance().GetScreenRatio( flX, flY ))
+    {
+        m_flSavesOffsetX *= (flX);
+    }
+
 	int nX, nY;
 	GamepadUI::GetInstance().GetSizingPanelOffset( nX, nY );
 	if (nX > 0)
 	{
-		float flX, flY;
 		GamepadUI::GetInstance().GetSizingPanelScale( flX, flY );
 		flX *= 0.4f;
 
@@ -229,7 +231,10 @@ void GamepadUISaveGamePanel::ApplySchemeSettings( vgui::IScheme *pScheme )
 		m_flSavesFade += ((float)nX) * flX;
 	}
 
-	m_pScrollBar->InitScrollBar( &m_ScrollState, m_flSavesOffsetX + m_pSavePanels[0]->GetWide() + m_flSavesSpacing, m_flSavesOffsetY );
+	if ( m_pScrollBar )
+	{
+		m_pScrollBar->InitScrollBar( &m_ScrollState, m_flSavesOffsetX + m_pSavePanels[0]->GetWide() + m_flSavesSpacing, m_flSavesOffsetY );
+	}
 }
 
 void GamepadUISaveGamePanel::OnThink()
@@ -260,6 +265,10 @@ void GamepadUISaveGamePanel::Paint()
 /* Mostly from GameUI */
 void GamepadUISaveGamePanel::ScanSavedGames()
 {
+	m_Saves.Purge();
+	m_pSavePanels.PurgeAndDeleteElements();
+	m_pDeletePanels.PurgeAndDeleteElements();
+
 	// populate list box with all saved games on record:
 	char	szDirectory[_MAX_PATH];
 	Q_snprintf( szDirectory, sizeof( szDirectory ), "save/*.sav" );
@@ -327,11 +336,42 @@ void GamepadUISaveGamePanel::ScanSavedGames()
 	}
 	else
 	{
-		SetFooterButtons( FooterButtons::Back | FooterButtons::Select, FooterButtons::Select );
+		if ( m_bIsSave )
+		{
+			SetFooterButtons( FooterButtons::Back | FooterButtons::Select, FooterButtons::Select );
+		}
+		else
+		{
+			SetFooterButtons( FooterButtons::Back | FooterButtons::Delete | FooterButtons::Select, FooterButtons::Select );
+		}
 	}
 
 	SetControlEnabled( "loadsave", false );
 	SetControlEnabled( "delete", false );
+
+    if ( m_pSavePanels.Count() )
+	{
+		if ( !m_pScrollBar )
+		{
+			m_pScrollBar = new GamepadUIScrollBar(
+				this, this,
+				GAMEPADUI_RESOURCE_FOLDER "schemescrollbar.res",
+				NULL, false );
+
+			m_pScrollBar->SetNavLeft( m_pSavePanels[0] );
+		}
+	}
+	else if ( m_pScrollBar )
+	{
+		m_pScrollBar->MarkForDeletion();
+		m_pScrollBar = NULL;
+	}
+
+    for ( int i = 1; i < m_pSavePanels.Count(); i++ )
+    {
+        m_pSavePanels[i]->SetNavUp( m_pSavePanels[i - 1] );
+        m_pSavePanels[i - 1]->SetNavDown( m_pSavePanels[i] );
+    }
 }
 
 bool GamepadUISaveGamePanel::ParseSaveData( char const* pFileName, char const* pShortName, SaveGameDescription_t& save )
@@ -666,6 +706,13 @@ void GamepadUISaveGamePanel::LayoutSaveButtons()
         m_pSavePanels[i]->SetPos( m_flSavesOffsetX, y );
         m_pSavePanels[i]->SetVisible( true );
         previousSizes += size;
+
+		if (m_pDeletePanels.Count() > i)
+		{
+			m_pDeletePanels[i]->SetPos( m_flSavesOffsetX - m_pDeletePanels[i]->GetWide() - m_flSavesSpacing, y );
+			m_pDeletePanels[i]->SetAlpha( fade );
+			m_pDeletePanels[i]->SetVisible( true );
+		}
     }
 
     m_ScrollState.UpdateScrolling( 2.0f, GamepadUI::GetInstance().GetTime() );
@@ -712,6 +759,71 @@ void GamepadUISaveGamePanel::OnCommand( char const* pCommand )
     if ( !V_strcmp( pCommand, "action_back" ) )
     {
         Close();
+    }
+	else if ( !V_strcmp( pCommand, "action_delete_mode_button" ) )
+    {
+		for ( auto& panel : m_pDeletePanels )
+		{
+			if ( panel->HasFocus() )
+			{
+				new GamepadUIGenericConfirmationPanel( this, "SaveDeleteConfirmationPanel", "#GameUI_ConfirmDeleteSaveGame_Title", "#GameUI_ConfirmDeleteSaveGame_Info",
+				[this, panel]()
+				{
+					DeleteSaveGame( panel->GetName() );
+					ScanSavedGames();
+				} );
+				break;
+			}
+		}
+	}
+	else if ( !V_strcmp( pCommand, "action_delete" ) )
+    {
+#ifdef STEAM_INPUT
+        const bool bController = GamepadUI::GetInstance().GetSteamInput()->IsEnabled();
+#elif defined(HL2_RETAIL) // Steam input and Steam Controller are not supported in SDK2013 (Madi)
+        const bool bController = g_pInputSystem->IsSteamControllerActive();
+#else
+        const bool bController = ( g_pInputSystem->GetJoystickCount() >= 1 );
+#endif
+		if (InDeleteMode())
+		{
+			m_pDeletePanels.PurgeAndDeleteElements();
+		}
+		else if (!bController && gamepadui_savegame_use_delete_mode.GetBool())
+		{
+			// Add delete panels
+			for (int i = 0; i < m_pSavePanels.Count(); i++)
+			{
+				GamepadUIButton *button = new GamepadUIButton( this, this, GAMEPADUI_RESOURCE_FOLDER "schemedeletesavebutton.res", "action_delete_mode_button", "X", "");
+				button->SetName( m_pSavePanels[i]->GetSaveGame()->szFileName );
+				button->SetPriority( m_pSavePanels[i]->GetPriority() );
+				button->SetForwardToParent( true );
+				m_pDeletePanels.AddToTail( button );
+			}
+		}
+		else
+		{
+			// Delete directly if using a controller
+			for ( auto& panel : m_pSavePanels )
+			{
+				if ( panel->HasFocus() )
+				{
+					new GamepadUIGenericConfirmationPanel( this, "SaveDeleteConfirmationPanel", "#GameUI_ConfirmDeleteSaveGame_Title", "#GameUI_ConfirmDeleteSaveGame_Info",
+					[this, panel]()
+					{
+						int i = m_pSavePanels.Find( panel );
+						DeleteSaveGame( panel->GetSaveGame()->szFileName );
+						ScanSavedGames();
+
+						if ( i > 0 && m_pSavePanels.Count() >= i )
+							m_pSavePanels[i-1]->NavigateTo();
+						else if ( m_pSavePanels.Count() )
+							m_pSavePanels[0]->NavigateTo();
+					} );
+					break;
+				}
+			}
+		}
     }
 	else if ( !V_strcmp( pCommand, "load_save" ) )
 	{
