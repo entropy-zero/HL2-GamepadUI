@@ -21,6 +21,9 @@
 #include "tier0/memdbgon.h"
 
 ConVar gamepadui_savegame_use_delete_mode( "gamepadui_savegame_use_delete_mode", "1", FCVAR_NONE, "Causes the save game panel to use a \"delete mode\" when not using a controller, showing X buttons next to each save game" );
+#ifdef GAMEPADUI_GAME_EZ2
+ConVar gamepadui_savegame_wilson_thumb( "gamepadui_savegame_wilson_thumb", "1", FCVAR_NONE, "Shows a Wilson icon on save games that have Wilson" );
+#endif
 
 class GamepadUISaveButton;
 struct SaveGameDescription_t;
@@ -31,6 +34,7 @@ class GamepadUISaveGamePanel : public GamepadUIFrame
 
 public:
     GamepadUISaveGamePanel( vgui::Panel *pParent, const char* pPanelName, bool bIsSave );
+	~GamepadUISaveGamePanel();
 
     void UpdateGradients();
 
@@ -42,6 +46,16 @@ public:
 
 	bool InDeleteMode() { return m_pDeletePanels.Count() > 0; }
 
+#ifdef GAMEPADUI_GAME_EZ2
+	const char *IsSaveSuspect( const char *pszEZ2Version, const char *pszMapName, int nMapVersion );
+
+    GamepadUIImage &GetWilsonThumb( float &flSize, float &flOffsetX, float &flOffsetY )
+    {
+        flSize = m_flThumbSize; flOffsetX = m_flThumbOffsetX; flOffsetY = m_flThumbOffsetY;
+        return m_WilsonThumb;
+    }
+#endif
+
     MESSAGE_FUNC_HANDLE( OnGamepadUIButtonNavigatedTo, "OnGamepadUIButtonNavigatedTo", button );
 
 private:
@@ -49,6 +63,12 @@ private:
     void LayoutSaveButtons();
     bool ParseSaveData( char const* pFileName, char const* pShortName, SaveGameDescription_t& save );
     static int SaveReadNameAndComment( FileHandle_t f, OUT_Z_CAP( nameSize ) char* name, int nameSize, OUT_Z_CAP( commentSize ) char* comment, int commentSize );
+#ifdef GAMEPADUI_GAME_EZ2
+	static int SaveReadCustomMetadata( const char *pSaveName, char *ez2version, int ez2versionSize, char *platform, int platformSize, int &nMapVersion, bool &bDeck, bool &bWilson );
+
+	void LoadVersionHistory();
+	void UnloadVersionHistory();
+#endif
     void FindSaveSlot( OUT_Z_CAP( bufsize ) char* buffer, int bufsize );
     void DeleteSaveGame( const char* pFileName );
 
@@ -68,10 +88,20 @@ private:
 
     bool m_bIsSave;
 
+#ifdef GAMEPADUI_GAME_EZ2
+	KeyValues *m_pVersionHistory;
+
+	GamepadUIImage m_WilsonThumb;
+#endif
+
     GAMEPADUI_PANEL_PROPERTY( float, m_flSavesFade, "Saves.Fade", "0", SchemeValueTypes::ProportionalFloat );
     GAMEPADUI_PANEL_PROPERTY( float, m_flSavesOffsetX, "Saves.OffsetX", "0", SchemeValueTypes::ProportionalFloat );
     GAMEPADUI_PANEL_PROPERTY( float, m_flSavesOffsetY, "Saves.OffsetY", "0", SchemeValueTypes::ProportionalFloat );
     GAMEPADUI_PANEL_PROPERTY( float, m_flSavesSpacing, "Saves.Spacing", "0", SchemeValueTypes::ProportionalFloat );
+
+	GAMEPADUI_PANEL_PROPERTY( float, m_flThumbSize, "Saves.Thumb.Size", "16", SchemeValueTypes::ProportionalFloat );
+	GAMEPADUI_PANEL_PROPERTY( float, m_flThumbOffsetX, "Saves.Thumb.OffsetX", "4", SchemeValueTypes::ProportionalFloat );
+	GAMEPADUI_PANEL_PROPERTY( float, m_flThumbOffsetY, "Saves.Thumb.OffsetY", "4", SchemeValueTypes::ProportionalFloat );
 };
 
 /* From GameUI */
@@ -96,6 +126,13 @@ struct SaveGameDescription_t
 	char szFileTime[32];
 	unsigned int iTimestamp;
 	unsigned int iSize;
+#ifdef GAMEPADUI_GAME_EZ2
+	char szEZ2Version[8];
+	char szPlatform[16];
+	int nMapVersion;
+	bool bDeck;
+	bool bWilson;
+#endif
 };
 /* End from GameUI */
 
@@ -127,7 +164,32 @@ public:
 		{
 			m_Image.SetImage( "gamepadui/save_game.vmt" );
 		}
+
+#ifdef GAMEPADUI_GAME_EZ2
+		m_strEZ2Version = GamepadUIString( pSaveGame->szEZ2Version );
+#endif
     }
+
+#ifdef GAMEPADUI_GAME_EZ2
+	void ApplySchemeSettings( vgui::IScheme *pScheme ) OVERRIDE
+	{
+		BaseClass::ApplySchemeSettings( pScheme );
+
+		char szVersion[8];
+		V_UnicodeToUTF8( m_strEZ2Version.String(), szVersion, sizeof( szVersion ) );
+		m_pIncompatibleVersion = static_cast<GamepadUISaveGamePanel *>(GetParent())->IsSaveSuspect( szVersion, m_pSaveGame->szMapName, m_pSaveGame->nMapVersion );
+		if ( m_pIncompatibleVersion )
+		{
+			// For now, correspond suspect colors to over and out states
+			m_colBackgroundColorAnimationValue[ButtonStates::Over] = m_colSuspectSaveBackground;
+
+			m_colTextColorAnimationValue[ButtonStates::Out] = m_colSuspectSaveText;
+			m_colDescriptionColorAnimationValue[ButtonStates::Out] = m_colSuspectSaveText;
+
+			DoAnimations( true );
+		}
+	}
+#endif
 
     void Paint() OVERRIDE
     {
@@ -136,12 +198,13 @@ public:
 
         PaintButton();
 
+		// Save game icons are 180x100
+		int imgW = (t * 180) / 100;
+
 		if ( m_Image.IsValid() )
 		{
 			vgui::surface()->DrawSetColor( Color( 255, 255, 255, 255 ) );
 			vgui::surface()->DrawSetTexture( m_Image );
-			// Save game icons are 180x100
-			int imgW = ( t * 180 ) / 100;
 			int imgH = t;
 			// Half pixel offset to avoid leaking into pink + black
 			if ( m_bUseTGAImage )
@@ -159,12 +222,38 @@ public:
 		else
 		{
 			vgui::surface()->DrawSetColor( Color( 0, 0, 0, 255 ) );
-			int imgW = ( t * 180 ) / 100;
+			imgW = ( t * 180 ) / 100;
 			int imgH = t;
 			vgui::surface()->DrawFilledRect( 0, 0, imgW, imgH );
 		}
 
         PaintText();
+
+#ifdef GAMEPADUI_GAME_EZ2
+		if ( !m_strEZ2Version.IsEmpty() )
+		{
+			int nTextW, nTextH;
+			vgui::surface()->GetTextSize( m_hDescriptionFont, m_strEZ2Version.String(), nTextW, nTextH );
+
+			int nTextX = m_flWidth - m_flTextOffsetX - nTextW + imgW;
+			int nTextY = m_flHeight + m_flTextOffsetY - nTextH;
+
+			vgui::surface()->DrawSetTextFont( m_hTextFont );
+			vgui::surface()->DrawSetTextPos( nTextX, nTextY );
+			vgui::surface()->DrawSetTextColor( m_colDescriptionColor );
+			vgui::surface()->DrawPrintText( m_strEZ2Version.String(), m_strEZ2Version.Length() );
+		}
+
+		if ( m_pSaveGame->bWilson && gamepadui_savegame_wilson_thumb.GetBool() )
+		{
+			float flSize, flOffsetX, flOffsetY;
+			vgui::surface()->DrawSetColor( m_colDescriptionColor );
+			vgui::surface()->DrawSetTexture( static_cast<GamepadUISaveGamePanel*>(GetParent())->GetWilsonThumb( flSize, flOffsetX, flOffsetY ) );
+			//vgui::surface()->DrawTexturedSubRect( m_flWidth - flOffsetX - flSize, flOffsetY, m_flWidth - flOffsetX, flOffsetY + flSize, 0.28125f, 0.1875f, 0.703125f, 0.703125f );
+			vgui::surface()->DrawTexturedSubRect( flOffsetX, flOffsetY, flOffsetX + flSize, flOffsetY + flSize, 0.28125f, 0.1875f, 0.703125f, 0.703125f );
+			vgui::surface()->DrawSetTexture( 0 );
+		}
+#endif
     }
 
 	const SaveGameDescription_t* GetSaveGame() const
@@ -172,10 +261,24 @@ public:
 		return m_pSaveGame;
 	}
 
+#ifdef GAMEPADUI_GAME_EZ2
+	const char *GetIncompatibleVersion() const
+	{
+		return m_pIncompatibleVersion;
+	}
+#endif
+
 private:
 	bool m_bUseTGAImage = false;
     GamepadUIImage m_Image;
 	const SaveGameDescription_t *m_pSaveGame;
+#ifdef GAMEPADUI_GAME_EZ2
+	GamepadUIString m_strEZ2Version;
+	const char *m_pIncompatibleVersion = NULL;
+
+	GAMEPADUI_PANEL_PROPERTY( Color, m_colSuspectSaveBackground, "Button.Background.SuspectSave", "255 128 0 255", SchemeValueTypes::Color );
+	GAMEPADUI_PANEL_PROPERTY( Color, m_colSuspectSaveText, "Button.Text.SuspectSave", "255 128 0 255", SchemeValueTypes::Color );
+#endif
 };
 
 GamepadUISaveGamePanel::GamepadUISaveGamePanel( vgui::Panel* pParent, const char* pPanelName, bool bIsSave )
@@ -192,12 +295,24 @@ GamepadUISaveGamePanel::GamepadUISaveGamePanel( vgui::Panel* pParent, const char
 	if ( m_bIsSave )
 		m_Saves.AddToTail( SaveGameDescription_t{ "NewSavedGame", "", "", "#GameUI_NewSaveGame", "", "", "Current", NEW_SAVE_GAME_TIMESTAMP } );
 
+#ifdef GAMEPADUI_GAME_EZ2
+	m_WilsonThumb.SetImage( "vgui/icons/icon_wilson" );
+
+	LoadVersionHistory();
+#endif
     ScanSavedGames();
 
     if ( m_pSavePanels.Count() )
         m_pSavePanels[0]->NavigateTo();
 
 	UpdateGradients();
+}
+
+GamepadUISaveGamePanel::~GamepadUISaveGamePanel()
+{
+#ifdef GAMEPADUI_GAME_EZ2
+	UnloadVersionHistory();
+#endif
 }
 
 void GamepadUISaveGamePanel::UpdateGradients()
@@ -398,6 +513,15 @@ bool GamepadUISaveGamePanel::ParseSaveData( char const* pFileName, char const* p
 		return false;
 	}
 
+#ifdef GAMEPADUI_GAME_EZ2
+	char szEZ2Version[8];
+	char szPlatform[16];
+	int nMapVersion = 0;
+	bool bDeck = false;
+	bool bWilson = false;
+	SaveReadCustomMetadata( pFileName, szEZ2Version, sizeof(szEZ2Version), szPlatform, sizeof(szPlatform), nMapVersion, bDeck, bWilson );
+#endif
+
 	Q_strncpy( save.szMapName, szMapName, sizeof( save.szMapName ) );
 
 	// Elapsed time is the last 6 characters in comment. ( mmm:ss )
@@ -466,6 +590,13 @@ bool GamepadUISaveGamePanel::ParseSaveData( char const* pFileName, char const* p
 	}
 	Q_strncpy( save.szFileTime, szFileTime, sizeof( save.szFileTime ) );
 	save.iTimestamp = fileTime;
+#ifdef GAMEPADUI_GAME_EZ2
+	Q_strncpy( save.szEZ2Version, szEZ2Version, sizeof( save.szEZ2Version ) );
+	Q_strncpy( save.szPlatform, szPlatform, sizeof( save.szPlatform ) );
+	save.nMapVersion = nMapVersion;
+	save.bDeck = bDeck;
+	save.bWilson = bWilson;
+#endif
 	return true;
 }
 
@@ -586,6 +717,111 @@ int GamepadUISaveGamePanel::SaveReadNameAndComment( FileHandle_t f, OUT_Z_CAP( n
 	return 0;
 }
 
+#ifdef GAMEPADUI_GAME_EZ2
+int GamepadUISaveGamePanel::SaveReadCustomMetadata( const char *pSaveName, char *ez2version, int ez2versionSize, char *platform, int platformSize, int &nMapVersion, bool &bDeck, bool &bWilson )
+{
+	char name[MAX_PATH];
+	Q_strncpy( name, pSaveName, sizeof( name ) );
+	Q_SetExtension( name, ".txt", sizeof( name ) );
+
+	KeyValues *pCustomSaveMetadata = new KeyValues( "CustomSaveMetadata" );
+	if (pCustomSaveMetadata->LoadFromFile( g_pFullFileSystem, name, "MOD" ))
+	{
+		Q_strncpy( ez2version, pCustomSaveMetadata->GetString( "ez2_version" ), ez2versionSize );
+		Q_strncpy( platform, pCustomSaveMetadata->GetString( "platform" ), platformSize );
+		nMapVersion = pCustomSaveMetadata->GetInt( "mapversion" );
+		bDeck = pCustomSaveMetadata->GetBool( "is_deck" );
+		bWilson = pCustomSaveMetadata->GetBool( "wilson" );
+
+		pCustomSaveMetadata->deleteThis();
+		return 1;
+	}
+
+	pCustomSaveMetadata->deleteThis();
+	return 0;
+}
+
+// 0 = equal, -1 = version 1 greater, 1 = version 2 greater
+static int CompareVersions( const char *pszVersion1, const char *pszVersion2 )
+{
+	if (!(pszVersion1 || *pszVersion1))
+		return 1;
+	if (!(pszVersion2 || *pszVersion2))
+		return -1;
+
+	CUtlStringList szVersionNums1;
+	V_SplitString( pszVersion1, ".", szVersionNums1 );
+
+	CUtlStringList szVersionNums2;
+	V_SplitString( pszVersion2, ".", szVersionNums2 );
+
+	Assert( szVersionNums1.Count() == szVersionNums2.Count() );
+
+	int nReturn = 0;
+	for (int i = 0; i < szVersionNums1.Count(); i++)
+	{
+		int nV1 = atoi( szVersionNums1[i] );
+		int nV2 = atoi( szVersionNums2[i] );
+		if (nV1 > nV2)
+		{
+			nReturn = -1;
+			break;
+		}
+		else if (nV1 < nV2)
+		{
+			nReturn = 1;
+			break;
+		}
+	}
+
+	szVersionNums1.PurgeAndDeleteElements();
+	szVersionNums2.PurgeAndDeleteElements();
+
+	return nReturn;
+}
+
+void GamepadUISaveGamePanel::LoadVersionHistory()
+{
+	m_pVersionHistory = new KeyValues( "VersionHistory" );
+	m_pVersionHistory->LoadFromFile( g_pFullFileSystem, "scripts/ez2_version_history.txt", "MOD" );
+}
+
+void GamepadUISaveGamePanel::UnloadVersionHistory()
+{
+	m_pVersionHistory->deleteThis();
+}
+
+const char *GamepadUISaveGamePanel::IsSaveSuspect( const char *pszEZ2Version, const char *pszMapName, int nMapVersion )
+{
+	if (m_pVersionHistory)
+	{
+		KeyValues *pVersionKey = m_pVersionHistory->GetFirstSubKey();
+		while (pVersionKey)
+		{
+			if (CompareVersions( pszEZ2Version, pVersionKey->GetName() ) == 1)
+			{
+				KeyValues *pMaps = pVersionKey->FindKey( "maps" );
+				if (pMaps)
+				{
+					KeyValues *pMapKey = pMaps->FindKey( pszMapName );
+					if (pMapKey)
+					{
+						return pMapKey->GetName();
+
+						//if (pMapKey->GetInt( "mapversion" ) != nMapVersion)
+						//	return pMapKey->GetName();
+					}
+				}
+			}
+
+			pVersionKey = pVersionKey->GetNextKey();
+		}
+	}
+
+	return NULL;
+}
+#endif
+
 void GamepadUISaveGamePanel::FindSaveSlot( OUT_Z_CAP( bufsize ) char* buffer, int bufsize )
 {
 	buffer[0] = 0;
@@ -629,6 +865,12 @@ void GamepadUISaveGamePanel::DeleteSaveGame( const char* pFileName )
 		strcpy( ext, ".tga" );
 	}
 	g_pFullFileSystem->RemoveFile( tga, "MOD" );
+
+#ifdef GAMEPADUI_GAME_EZ2
+	// delete the associated txt
+	Q_SetExtension( tga, ".txt", sizeof( tga ) );
+	g_pFullFileSystem->RemoveFile( tga, "MOD" );
+#endif
 }
 /* End Mostly from GameUI */
 
@@ -846,7 +1088,20 @@ void GamepadUISaveGamePanel::OnCommand( char const* pCommand )
 						SaveGame( pSave );
 				}
 				else
+				{
+#ifdef GAMEPADUI_GAME_EZ2
+					if (panel->GetIncompatibleVersion())
+					{
+						new GamepadUIGenericConfirmationPanel( this, "IncompatibleVersionConfirmationPanel", "#GameUI_IncompatibleVersion_Title", "#GameUI_IncompatibleVersion_Info",
+						[this, pSave]()
+						{
+							LoadGame( pSave );
+						} );
+					}
+					else
+#endif
 					LoadGame( pSave );
+				}
 				break;
 			}
 		}
