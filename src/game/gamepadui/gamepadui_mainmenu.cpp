@@ -46,6 +46,9 @@ void GamepadUIMainMenu::UpdateGradients()
 #else
     GamepadUI::GetInstance().GetGradientHelper()->SetTargetGradient( GradientSide::Left, { 1.0f, 0.666f }, flTime );
 #endif
+
+    // In case a controller is added mid-game
+    SetFooterButtons( FooterButtons::Select, FooterButtons::Select );
 }
 
 void GamepadUIMainMenu::LoadMenuButtons()
