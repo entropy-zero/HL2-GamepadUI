@@ -298,9 +298,6 @@ GamepadUISaveGamePanel::GamepadUISaveGamePanel( vgui::Panel* pParent, const char
 
     Activate();
 
-	if ( m_bIsSave )
-		m_Saves.AddToTail( SaveGameDescription_t{ "NewSavedGame", "", "", "#GameUI_NewSaveGame", "", "", "Current", NEW_SAVE_GAME_TIMESTAMP } );
-
 #ifdef GAMEPADUI_GAME_EZ2
 	m_WilsonThumb.SetImage( "vgui/icons/icon_wilson" );
 
@@ -389,6 +386,9 @@ void GamepadUISaveGamePanel::ScanSavedGames()
 	m_Saves.Purge();
 	m_pSavePanels.PurgeAndDeleteElements();
 	m_pDeletePanels.PurgeAndDeleteElements();
+
+	if ( m_bIsSave )
+		m_Saves.AddToTail( SaveGameDescription_t{ "NewSavedGame", "", "", "#GameUI_NewSaveGame", "", "", "Current", NEW_SAVE_GAME_TIMESTAMP } );
 
 	// populate list box with all saved games on record:
 	char	szDirectory[_MAX_PATH];
