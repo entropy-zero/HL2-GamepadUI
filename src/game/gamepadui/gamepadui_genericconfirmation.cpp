@@ -125,3 +125,37 @@ CON_COMMAND( gamepadui_openquitgamedialog, "" )
         GamepadUI::GetInstance().GetEngineClient()->ClientCmd_Unrestricted( "quit" );
     } );
 }
+
+CON_COMMAND( gamepadui_opengenerictextdialog, "Opens a generic text dialog.\nFormat: gamepadui_opengenerictextdialog <title> <text> <small font (0 or 1)>" )
+{
+    if (args.ArgC() < 4)
+    {
+        Msg("Format: gamepadui_opengenerictextdialog <title> <text> <small font (0 or 1)>\n");
+        return;
+    }
+
+    // TODO: Parent to current frame
+    new GamepadUIGenericConfirmationPanel( GamepadUI::GetInstance().GetBasePanel(), "GenericConfirmationPanel", args.Arg(1), args.Arg(2),
+    [](){}, args.Arg(3)[0] != '0', false );
+}
+
+CON_COMMAND( gamepadui_opengenericconfirmdialog, "Opens a generic confirmation dialog which executes a command.\nFormat: gamepadui_opengenericconfirmdialog <title> <text> <small font (0 or 1)> <command>\n<command> supports quotation marks as double apostrophes." )
+{
+    if (args.ArgC() < 5)
+    {
+        Msg("Format: gamepadui_opengenericconfirmdialog <title> <text> <small font (0 or 1)> <command>\n");
+        return;
+    }
+
+    // TODO: Parent to current frame
+    const char *pCmd = args.Arg( 4 );
+    new GamepadUIGenericConfirmationPanel( GamepadUI::GetInstance().GetBasePanel(), "GenericConfirmationPanel", args.Arg(1), args.Arg(2),
+    [pCmd]()
+    {
+        // Replace '' with quotes
+        char szCmd[512];
+        V_StrSubst( pCmd, "''", "\"", szCmd, sizeof(szCmd) );
+
+        GamepadUI::GetInstance().GetEngineClient()->ClientCmd_Unrestricted( szCmd );
+    }, args.Arg(3)[0] != '0', true );
+}
