@@ -66,6 +66,7 @@ void GamepadUIMainMenu::LoadMenuButtons()
                     pData->GetString( "command" ),
                     pData->GetString( "text", "Sample Text" ),
                     pData->GetString( "description", "" ) );
+                pButton->SetName( pData->GetName() );
                 pButton->SetPriority( V_atoi( pData->GetString( "priority", "0" ) ) );
                 pButton->SetVisible( true );
 
@@ -79,6 +80,18 @@ void GamepadUIMainMenu::LoadMenuButtons()
 
         pDataFile->deleteThis();
     }
+
+#ifdef GAMEPADUI_GAME_EZ2
+    {
+        m_pSwitchToOldUIButton = new GamepadUIButton(
+                        this, this,
+                        GAMEPADUI_RESOURCE_FOLDER "schememainmenu_olduibutton.res",
+                        "cmd gamepadui_opengenerictextdialog #GameUI_SwitchToOldUI_Title #GameUI_SwitchToOldUI_Info 1",
+                        "#GameUI_GameMenu_SwitchToOldUI", "" );
+        m_pSwitchToOldUIButton->SetPriority( 0 );
+        m_pSwitchToOldUIButton->SetVisible( true );
+    }
+#endif
 
     UpdateButtonVisibility();
 }
@@ -219,6 +232,30 @@ void GamepadUIMainMenu::UpdateButtonVisibility()
 
     if ( !currentButtons.IsEmpty() )
         currentButtons[ currentButtons.Count() - 1 ]->NavigateTo();
+
+#ifdef GAMEPADUI_GAME_EZ2
+    if ( m_pSwitchToOldUIButton )
+    {
+        if ( !GamepadUI::GetInstance().GetSteamInput() || !GamepadUI::GetInstance().GetSteamInput()->IsSteamRunningOnSteamDeck() )
+        {
+            int nParentW, nParentH;
+            GetParent()->GetSize( nParentW, nParentH );
+
+            m_pSwitchToOldUIButton->SetPos( m_flOldUIButtonOffsetX, nParentH - m_pSwitchToOldUIButton->m_flHeight - m_flOldUIButtonOffsetY );
+            m_pSwitchToOldUIButton->SetVisible( true );
+
+            if (!currentButtons.IsEmpty())
+            {
+                currentButtons[ 0 ]->SetNavDown( m_pSwitchToOldUIButton );
+                m_pSwitchToOldUIButton->SetNavUp( currentButtons[0] );
+            }
+        }
+        else
+        {
+            m_pSwitchToOldUIButton->SetVisible( false );
+        }
+    }
+#endif
 }
 
 void GamepadUIMainMenu::OnKeyCodeReleased( vgui::KeyCode code )
