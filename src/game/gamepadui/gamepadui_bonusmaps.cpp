@@ -296,6 +296,17 @@ public:
             SetSize( m_flWidth, m_flHeight + m_flExtraHeight );
             DoAnimations( true );
         }
+
+        // Use a smaller font if necessary
+        int nTextSizeX, nTextSizeY;
+        vgui::surface()->GetTextSize( m_hTextFont, m_strButtonText.String(), nTextSizeX, nTextSizeY );
+        if ( nTextSizeX >= m_flWidth )
+        {
+            m_hTextFont        = pScheme->GetFont( "Button.Text.Font.Small", true );
+            m_hTextFontOver    = pScheme->GetFont( "Button.Text.Font.Small.Over", true );
+            if (m_hTextFontOver == vgui::INVALID_FONT )
+                m_hTextFontOver = m_hTextFont;
+        }
     }
 
     void NavigateTo() OVERRIDE
