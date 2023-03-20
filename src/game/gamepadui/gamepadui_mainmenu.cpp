@@ -14,6 +14,10 @@
 #define GAMEPADUI_MAINMENU_SCHEME GAMEPADUI_RESOURCE_FOLDER "schememainmenu.res"
 #define GAMEPADUI_MAINMENU_FILE GAMEPADUI_RESOURCE_FOLDER "mainmenu.res"
 
+#ifdef GAMEPADUI_GAME_EZ2
+ConVar gamepadui_show_ez2_version( "gamepadui_show_ez2_version", "1", FCVAR_NONE, "Show E:Z2 version in menu" );
+#endif
+
 GamepadUIMainMenu::GamepadUIMainMenu( vgui::Panel* pParent )
     : BaseClass( pParent, "MainMenu" )
 {
@@ -108,6 +112,13 @@ void GamepadUIMainMenu::ApplySchemeSettings( vgui::IScheme* pScheme )
     if ( pImage && *pImage )
         m_LogoImage.SetImage( pImage );
     m_hLogoFont = pScheme->GetFont( "Logo.Font", true );
+
+#ifdef GAMEPADUI_GAME_EZ2
+    m_hVersionFont = pScheme->GetFont( "Version.Font", true );
+
+    ConVarRef ez2_version( "ez2_version" );
+    m_strEZ2Version = ez2_version.GetString();
+#endif
 }
 
 void GamepadUIMainMenu::LayoutMainMenu()
@@ -162,6 +173,19 @@ void GamepadUIMainMenu::PaintLogo()
             nLogoY -= nLogoH[ i ];
         }
     }
+
+#ifdef GAMEPADUI_GAME_EZ2
+    if (gamepadui_show_ez2_version.GetBool() && !m_strEZ2Version.IsEmpty())
+    {
+        int nVersionW, nVersionH;
+        vgui::surface()->GetTextSize( m_hVersionFont, m_strEZ2Version.String(), nVersionW, nVersionH );
+
+        vgui::surface()->DrawSetTextColor( m_colVersionColor );
+        vgui::surface()->DrawSetTextFont( m_hVersionFont );
+        vgui::surface()->DrawSetTextPos( m_flLogoOffsetX + m_flVersionOffsetX + nLogoW[0], nLogoY + (nLogoH[0] * 2) - nVersionH);
+        vgui::surface()->DrawPrintText( m_strEZ2Version.String(), m_strEZ2Version.Length() );
+    }
+#endif
 }
 
 void GamepadUIMainMenu::OnThink()

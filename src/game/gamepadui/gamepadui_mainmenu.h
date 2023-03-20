@@ -74,6 +74,15 @@ private:
     GAMEPADUI_PANEL_PROPERTY( Color, m_colLogoColor, "Logo", "255 255 255 255", SchemeValueTypes::Color );
 
     vgui::HFont m_hLogoFont;
+
+#ifdef GAMEPADUI_GAME_EZ2
+    GAMEPADUI_PANEL_PROPERTY( Color, m_colVersionColor, "Version", "255 128 0 255", SchemeValueTypes::Color );
+    GAMEPADUI_PANEL_PROPERTY( float, m_flVersionOffsetX, "Version.OffsetX", "16", SchemeValueTypes::ProportionalFloat );
+
+    vgui::HFont m_hVersionFont;
+
+    GamepadUIString m_strEZ2Version;
+#endif
 };
 
 #endif
