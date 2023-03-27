@@ -16,6 +16,7 @@
 
 #ifdef GAMEPADUI_GAME_EZ2
 ConVar gamepadui_show_ez2_version( "gamepadui_show_ez2_version", "1", FCVAR_NONE, "Show E:Z2 version in menu" );
+ConVar gamepadui_show_old_ui_button( "gamepadui_show_old_ui_button", "1", FCVAR_NONE, "Show button explaining how to switch to the old UI (Changes may not take effect until changing level)" );
 #endif
 
 GamepadUIMainMenu::GamepadUIMainMenu( vgui::Panel* pParent )
@@ -131,6 +132,16 @@ void GamepadUIMainMenu::LayoutMainMenu()
         pButton->SetPos( m_flButtonsOffsetX, GetTall() - nY );
         nY += m_flButtonSpacing;
     }
+
+#ifdef GAMEPADUI_GAME_EZ2
+    if ( m_pSwitchToOldUIButton && m_pSwitchToOldUIButton->IsVisible() )
+    {
+        int nParentW, nParentH;
+        GetParent()->GetSize( nParentW, nParentH );
+
+        m_pSwitchToOldUIButton->SetPos( m_flOldUIButtonOffsetX, nParentH - m_pSwitchToOldUIButton->m_flHeight - m_flOldUIButtonOffsetY );
+    }
+#endif
 }
 
 void GamepadUIMainMenu::PaintLogo()
@@ -260,12 +271,8 @@ void GamepadUIMainMenu::UpdateButtonVisibility()
 #ifdef GAMEPADUI_GAME_EZ2
     if ( m_pSwitchToOldUIButton )
     {
-        if ( !GamepadUI::GetInstance().GetSteamInput() || !GamepadUI::GetInstance().GetSteamInput()->IsSteamRunningOnSteamDeck() )
+        if ( (!GamepadUI::GetInstance().GetSteamInput() || !GamepadUI::GetInstance().GetSteamInput()->IsSteamRunningOnSteamDeck()) && gamepadui_show_old_ui_button.GetBool() )
         {
-            int nParentW, nParentH;
-            GetParent()->GetSize( nParentW, nParentH );
-
-            m_pSwitchToOldUIButton->SetPos( m_flOldUIButtonOffsetX, nParentH - m_pSwitchToOldUIButton->m_flHeight - m_flOldUIButtonOffsetY );
             m_pSwitchToOldUIButton->SetVisible( true );
 
             if (!currentButtons.IsEmpty())
