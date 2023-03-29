@@ -258,6 +258,7 @@ public:
         PaintText();
 
 #ifdef GAMEPADUI_GAME_EZ2
+		if ( m_pSaveGame->iTimestamp != NEW_SAVE_GAME_TIMESTAMP )
 		{
 			const wchar_t *pwszEZ2Version = m_strEZ2Version.String();
 			int nEZ2VerLen = m_strEZ2Version.Length();
