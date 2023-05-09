@@ -59,6 +59,12 @@ GamepadUIFrame *GamepadUIBasePanel::GetCurrentFrame() const
 
 void GamepadUIBasePanel::SetCurrentFrame( GamepadUIFrame *pFrame )
 {
+    if (pFrame != NULL && m_pCurrentFrame != NULL)
+    {
+        // If there's already a frame, close it
+        m_pCurrentFrame->Close();
+    }
+
     m_pCurrentFrame = pFrame;
 }
 
