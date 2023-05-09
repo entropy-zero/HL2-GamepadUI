@@ -49,6 +49,8 @@ void GamepadUIBasePanel::ApplySchemeSettings( vgui::IScheme* pScheme )
     // Force the main menu to invalidate itself.
     // There is a weird ordering bug in VGUI we need to workaround.
     m_pMainMenu->InvalidateLayout( false, true );
+
+    m_pSizingPanel->InvalidateLayout( false, true );
 }
 
 GamepadUISizingPanel *GamepadUIBasePanel::GetSizingPanel() const
