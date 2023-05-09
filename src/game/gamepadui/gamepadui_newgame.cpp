@@ -347,7 +347,10 @@ void GamepadUINewGamePanel::ApplySchemeSettings( vgui::IScheme* pScheme )
         m_ChapterOffsetX *= (flY*flY);
     }
 
-    m_pScrollBar->InitScrollBar( &m_ScrollState, m_ChapterOffsetX, m_ChapterOffsetY + m_pChapterButtons[0]->GetTall() + m_ChapterSpacing );
+    if (m_pChapterButtons.Count() > 0)
+    {
+        m_pScrollBar->InitScrollBar( &m_ScrollState, m_ChapterOffsetX, m_ChapterOffsetY + m_pChapterButtons[0]->GetTall() + m_ChapterSpacing );
+    }
 }
 
 void GamepadUINewGamePanel::OnGamepadUIButtonNavigatedTo( vgui::VPANEL button )

@@ -58,7 +58,7 @@ private:
 
     GamepadUIScrollState m_ScrollState;
 
-	GamepadUIScrollBar *m_pScrollBar;
+	GamepadUIScrollBar *m_pScrollBar = NULL;
 
     bool m_bIsSave;
 
@@ -199,10 +199,13 @@ GamepadUISaveGamePanel::GamepadUISaveGamePanel( vgui::Panel* pParent, const char
 
 	UpdateGradients();
 
-    m_pScrollBar = new GamepadUIScrollBar(
-        this, this,
-        GAMEPADUI_RESOURCE_FOLDER "schemescrollbar.res",
-        NULL, false );
+    if ( m_pSavePanels.Count() )
+	{
+		m_pScrollBar = new GamepadUIScrollBar(
+			this, this,
+			GAMEPADUI_RESOURCE_FOLDER "schemescrollbar.res",
+			NULL, false );
+	}
 }
 
 void GamepadUISaveGamePanel::UpdateGradients()
@@ -229,7 +232,10 @@ void GamepadUISaveGamePanel::ApplySchemeSettings( vgui::IScheme *pScheme )
 		m_flSavesFade += ((float)nX) * flX;
 	}
 
-	m_pScrollBar->InitScrollBar( &m_ScrollState, m_flSavesOffsetX + m_pSavePanels[0]->GetWide() + m_flSavesSpacing, m_flSavesOffsetY );
+	if ( m_pScrollBar )
+	{
+		m_pScrollBar->InitScrollBar( &m_ScrollState, m_flSavesOffsetX + m_pSavePanels[0]->GetWide() + m_flSavesSpacing, m_flSavesOffsetY );
+	}
 }
 
 void GamepadUISaveGamePanel::OnThink()
