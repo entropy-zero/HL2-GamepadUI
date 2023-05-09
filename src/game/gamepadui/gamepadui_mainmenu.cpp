@@ -164,6 +164,17 @@ void GamepadUIMainMenu::OnCommand( char const* pCommand )
         const char* pszClientCmd = &pCommand[ 4 ];
         if ( *pszClientCmd )
             GamepadUI::GetInstance().GetEngineClient()->ClientCmd_Unrestricted( pszClientCmd );
+
+        // This is a hack to reset bonus challenges in the event that the player disconnected before the map loaded.
+        // We have no known way of detecting that event and differentiating between a bonus level and non-bonus level being loaded,
+        // so for now, we just reset this when the player presses any menu button, as that indicates they are in the menu and no longer loading a bonus level
+        // (note that this does not cover loading a map through other means, like through the console)
+        ConVarRef sv_bonus_challenge( "sv_bonus_challenge" );
+        if (sv_bonus_challenge.GetInt() != 0)
+        {
+            GamepadUI_Log( "Resetting sv_bonus_challenge\n" );
+            sv_bonus_challenge.SetValue( 0 );
+        }
     }
     else
     {
