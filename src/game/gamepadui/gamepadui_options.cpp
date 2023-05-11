@@ -1565,7 +1565,10 @@ GamepadUIOptionsPanel::GamepadUIOptionsPanel( vgui::Panel* pParent, const char* 
 
 GamepadUIOptionsPanel::~GamepadUIOptionsPanel()
 {
-    s_pOptionsPanel = NULL;
+    if (s_pOptionsPanel == this)
+    {
+        s_pOptionsPanel = NULL;
+    }
 }
 
 void GamepadUIOptionsPanel::OnThink()
