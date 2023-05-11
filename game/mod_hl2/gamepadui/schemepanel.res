@@ -152,6 +152,17 @@
 				"antialias"		"1"
 			}
 		}
+
+		"BonusDesc.Font"
+		{
+			"settings"
+			{
+				"name"			"Noto Sans"
+				"tall"			"13"
+				"weight"		"400"
+				"antialias"		"1"
+			}
+		}
 	}
 
 	"CustomFontFiles"

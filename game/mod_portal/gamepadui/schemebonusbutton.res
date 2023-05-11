@@ -68,8 +68,18 @@
 			"settings"
 			{
 				"name"			"Noto Sans"
-				"tall"			"19"
-				"weight"		"400"
+				"tall"			"16" // 19
+				"weight"		"750" // 400
+				"antialias"		"1"
+			}
+		}
+		"Button.Text.Font.Small"
+		{
+			"settings"
+			{
+				"name"			"Noto Sans"
+				"tall"			"14"
+				"weight"		"600"
 				"antialias"		"1"
 			}
 		}
