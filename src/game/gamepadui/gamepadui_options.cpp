@@ -156,6 +156,7 @@ public:
 
         if (state && ShowDescriptionAtFooter())
         {
+            Assert( GamepadUIOptionsPanel::GetInstance() != NULL );
             GamepadUIOptionsPanel::GetInstance()->SetOptionDescription( &m_strButtonDescription );
             m_bDescriptionHide = true;
         }
@@ -1826,6 +1827,12 @@ void GamepadUIOptionsPanel::OnCommand( char const* pCommand )
 #endif
 		new GamepadUIGenericConfirmationPanel( GamepadUIOptionsPanel::GetInstance(), "TechCredits", title.String(), wszBuf,
 		[](){}, true, false);
+    }
+    else if ( StringHasPrefixCaseSensitive( pCommand, "cmd " ) )
+    {
+        const char* pszClientCmd = &pCommand[ 4 ];
+        if ( *pszClientCmd )
+            GamepadUI::GetInstance().GetEngineClient()->ClientCmd_Unrestricted( pszClientCmd );
     }
     else
     {

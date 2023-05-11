@@ -11,9 +11,10 @@
 		"Button.Height.Over"					"28"
 		"Button.Height.Pressed"					"28"
 
-		"Button.Description.Hide.Out"				"0"
-		"Button.Description.Hide.Over"				"0"
-		"Button.Description.Hide.Pressed"			"0"
+		"Button.Description.Hide.Out"					"1"
+		"Button.Description.Hide.Over"					"1"
+		"Button.Description.Hide.Pressed"				"1"
+		"Button.Description.Hide.Animation.Duration"	"0"
 
 		"Button.Binding.Width"							"80"
 		"Button.Binding.Height"							"16"

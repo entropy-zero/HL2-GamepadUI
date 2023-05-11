@@ -3,9 +3,9 @@
 	"BaseSettings"
 	{
 
-		"Button.Width.Out"						"512"
-		"Button.Width.Over"						"512"
-		"Button.Width.Pressed"					"512"
+		"Button.Width.Out"						"600"
+		"Button.Width.Over"						"600"
+		"Button.Width.Pressed"					"600"
 
 		"Button.Text.OffsetX.Out"				"14"
 		"Button.Text.OffsetX.Over"				"14"
