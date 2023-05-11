@@ -793,7 +793,7 @@ int GamepadUISaveGamePanel::SaveReadCustomMetadata( const char *pSaveName, char 
 }
 
 // 0 = equal, negative = version 1 greater, positive = version 2 greater
-// //
+// 
 // Actual return number is based on which version place is greater/less
 // For example:
 // - '1' would mean version 1 is a major version greater than version 2
@@ -803,6 +803,12 @@ static int CompareVersions( const char *pszVersion1, const char *pszVersion2 )
 	if (!(pszVersion1 || *pszVersion1))
 		return 1;
 	if (!(pszVersion2 || *pszVersion2))
+		return -1;
+
+	// If the first character isn't a number, it's not a valid version
+	if (pszVersion1[0] < '0' || pszVersion1[0] > '9')
+		return 1;
+	if (pszVersion2[0] < '0' || pszVersion2[0] > '9')
 		return -1;
 
 	CUtlStringList szVersionNums1;
