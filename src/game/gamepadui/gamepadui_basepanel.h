@@ -7,6 +7,7 @@
 #include "gamepadui_interface.h"
 
 class GamepadUIMainMenu;
+class GamepadUIFrame;
 
 class GamepadUIBasePanel : public vgui::Panel
 {
@@ -18,6 +19,9 @@ public:
 
     GamepadUIMainMenu *GetMainMenuPanel() const;
 
+    GamepadUIFrame *GetCurrentFrame() const;
+    void SetCurrentFrame( GamepadUIFrame *pFrame );
+
     void OnMenuStateChanged();
 
     void ActivateBackgroundEffects();
@@ -27,6 +31,8 @@ public:
 
 private:
     GamepadUIMainMenu *m_pMainMenu = NULL;
+
+    GamepadUIFrame *m_pCurrentFrame = NULL;
 
     int m_nBackgroundMusicGUID;
     bool m_bBackgroundMusicEnabled;

@@ -2,6 +2,7 @@
 #include "gamepadui_frame.h"
 #include "gamepadui_button.h"
 #include "gamepadui_interface.h"
+#include "gamepadui_basepanel.h"
 
 #include "inputsystem/iinputsystem.h"
 #include "vgui/ISurface.h"
@@ -16,6 +17,12 @@ GamepadUIFrame::GamepadUIFrame( vgui::Panel *pParent, const char *pszPanelName, 
     // bodge to disable the frames title image and display our own
     // (the frames title has an invalid zpos and does not draw over the garnish)
     Frame::SetTitle( "", false );
+
+    if (pParent && pParent == GamepadUI::GetInstance().GetBasePanel())
+    {
+        GamepadUIBasePanel *pPanel = static_cast<GamepadUIBasePanel*>(pParent);
+        pPanel->SetCurrentFrame( this );
+    }
 
 	memset( &m_pFooterButtons, 0, sizeof( m_pFooterButtons ) );
 }
@@ -205,6 +212,12 @@ void GamepadUIFrame::LayoutFooterButtons()
 void GamepadUIFrame::OnClose()
 {
     BaseClass::OnClose();
+
+    if (GetParent() && GetParent() == GamepadUI::GetInstance().GetBasePanel())
+    {
+        GamepadUIBasePanel *pPanel = static_cast<GamepadUIBasePanel*>(GetParent());
+        pPanel->SetCurrentFrame( NULL );
+    }
 
     GamepadUIFrame *pFrame = dynamic_cast<GamepadUIFrame *>( GetParent() );
     if ( pFrame )
