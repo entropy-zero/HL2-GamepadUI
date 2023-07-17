@@ -92,6 +92,9 @@ public:
     void GetSizingPanelScale( float &flX, float &flY ) const;
     void GetSizingPanelOffset( int &nX, int &nY ) const;
 
+    GamepadUIFrame *GetCurrentFrame() const;
+    vgui::VPANEL GetCurrentFrameVPanel() const;
+
 #ifdef MAPBASE
 	void BonusMapChallengeNames( char *pchFileName, char *pchMapName, char *pchChallengeName ) OVERRIDE;
 	void BonusMapChallengeObjectives( int &iBronze, int &iSilver, int &iGold ) OVERRIDE;

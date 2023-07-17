@@ -242,6 +242,16 @@ void GamepadUI::GetSizingPanelOffset( int &nX, int &nY ) const
     pPanel->GetPos( nX, nY );
 }
 
+GamepadUIFrame *GamepadUI::GetCurrentFrame() const
+{
+    return m_pBasePanel->GetCurrentFrame();
+}
+
+vgui::VPANEL GamepadUI::GetCurrentFrameVPanel() const
+{
+    return m_pBasePanel->GetCurrentFrame()->GetVPanel();
+}
+
 #ifdef MAPBASE
 void GamepadUI::BonusMapChallengeNames( char *pchFileName, char *pchMapName, char *pchChallengeName )
 {
