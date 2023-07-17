@@ -35,6 +35,7 @@ class GamepadUIMainMenu;
 
 class GamepadUIBasePanel;
 class GamepadUISizingPanel;
+class GamepadUIFrame;
 
 class GamepadUI : public IGamepadUI
 {
