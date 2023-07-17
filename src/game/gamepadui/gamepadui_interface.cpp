@@ -190,3 +190,13 @@ GamepadUIMainMenu* GamepadUI::GetMainMenu() const
 {
     return static_cast<GamepadUIMainMenu*>( GetMainMenuPanel() );
 }
+
+GamepadUIFrame *GamepadUI::GetCurrentFrame() const
+{
+    return m_pBasePanel->GetCurrentFrame();
+}
+
+vgui::VPANEL GamepadUI::GetCurrentFrameVPanel() const
+{
+    return m_pBasePanel->GetCurrentFrame()->GetVPanel();
+}

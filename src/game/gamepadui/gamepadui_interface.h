@@ -76,6 +76,9 @@ public:
 
     CSteamAPIContext* GetSteamAPIContext() { return &m_SteamAPIContext; }
 
+    GamepadUIFrame *GetCurrentFrame() const;
+    vgui::VPANEL GetCurrentFrameVPanel() const;
+
 private:
 
     IEngineSound            *m_pEngineSound            = NULL;
